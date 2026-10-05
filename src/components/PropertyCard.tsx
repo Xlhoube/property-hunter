@@ -72,14 +72,21 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
 
         <div className="p-4 sm:p-5">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
-            <div className="flex items-center gap-1 font-medium text-slate-600">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5 gap-2">
+            <div className="flex items-center gap-1 font-medium text-slate-600 min-w-0">
               <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <span className="truncate">{property.freguesia}, {property.concelho}</span>
             </div>
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
-              {property.typology}
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {typeof property.distance_km === 'number' && (
+                <span className="inline-flex items-center text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60" title="Distância estimada em linha reta a partir do teu local">
+                  a {property.distance_km} km
+                </span>
+              )}
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                {property.typology}
+              </span>
+            </div>
           </div>
 
           <h3 className="line-clamp-2 text-base font-bold text-slate-900 leading-snug group-hover:text-slate-700 transition-colors">

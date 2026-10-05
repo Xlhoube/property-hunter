@@ -82,8 +82,13 @@ export default function HomePage() {
   };
 
   const handleExportCSV = () => {
-    const concelhoSlug = filters.concelho && filters.concelho !== 'Todos' ? filters.concelho.toLowerCase() : 'portugal';
-    exportPropertiesToCSV(properties, `oportunidades-${concelhoSlug}`);
+    let slug = 'portugal';
+    if (filters.radiusKm && filters.userLocation) {
+      slug = `raio-${filters.radiusKm}km`;
+    } else if (filters.concelho && filters.concelho !== 'Todos') {
+      slug = filters.concelho.toLowerCase();
+    }
+    exportPropertiesToCSV(properties, `oportunidades-${slug}`);
   };
 
   return (
@@ -130,6 +135,8 @@ export default function HomePage() {
                     typologies: [],
                     priceChangeOnly: false,
                     sortBy: 'newest',
+                    userLocation: null,
+                    radiusKm: null,
                   })
                 }
                 className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors cursor-pointer"

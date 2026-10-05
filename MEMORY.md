@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.5.0
+- **Versão Actual:** v0.6.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -29,8 +29,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
 - **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions a cada 12 horas (`0 8,20 * * *`) e Vercel Cron diária (`0 8 * * *`).
 - **Scrapers Nativos:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio) e Idealista (suporte a gateway anti-bloqueio).
-- **Geocodificação & Localização:** Endpoint nativo híbrido (`/api/geocode/reverse`) com OpenStreetMap Nominatim e matriz de proximidade geográfica dos 25 concelhos de Portugal Continental e Ilhas.
-- **Exportação & Relatórios:** Utilitário nativo de exportação de dossiê de investimentos em formato CSV compatível com Excel europeu (delimitador `;` e codificação UTF-8 BOM).
+- **Geocodificação & Proximidade:** Módulo geoespacial nativo (`src/lib/geo.ts`) com cálculo da distância esférica Haversine, suporte a coordenadas de referência de concelhos e endpoint híbrido (`/api/geocode/reverse`).
+- **Exportação & Relatórios:** Utilitário nativo de exportação de dossiê de investimentos em formato CSV compatível com Excel europeu (delimitador `;` e codificação UTF-8 BOM), incluindo distância calculada quando ativa.
 - **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
 
 ---
@@ -46,16 +46,19 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-008 (2026-10-05):** Implementação da suite de crawlers reais para os portais imobiliários portugueses em `src/lib/scrapers/` (Imovirtual com extracção estruturada via `__NEXT_DATA__`, CasaSAPO com parsing de cards e características com `cheerio`, e Idealista com suporte a proxy anti-bloqueio). Integração no serviço horário com deduplicação, cálculo automático de €/m² e disparo de alertas.
 - **ADR-009 (2026-10-05):** Implementação do Modal de Prospeção em Tempo Real (`ScrapeProgressModal`) e Exportação de Dossiê Imobiliário CSV (`exportPropertiesToCSV`). O utilizador pode agora acionar a varredura sob demanda a partir da navbar com acompanhamento em direto dos 3 portais (novos anúncios, baixas de preço e alertas), bem como descarregar a qualquer momento a lista filtrada de oportunidades formatada para Excel europeu com caracteres em Português de Portugal.
 - **ADR-010 (2026-10-05):** Ajuste da cadência de recolha automática para um intervalo de 12 horas (`cron: '0 8,20 * * *'`, executando às 08:00 e às 20:00 UTC) no GitHub Actions e indicação na interface. Esta medida protege o crawler contra bloqueios de IP/WAF por pedidos excessivos aos portais imobiliários, mantendo duas atualizações diárias abrangentes (manhã e noite) e a faculdade de disparo manual a qualquer momento.
-- **ADR-011 (2026-10-05):** Implementação de Geolocalização Nativa com Reverse Geocoding Híbrido. Adicionado à barra de filtros o botão "A minha localização" que aciona a API de Geolocation do browser (`navigator.geolocation.getCurrentPosition`). A latitude e longitude são resolvidas no servidor através de `/api/geocode/reverse` usando Nominatim OpenStreetMap (com timeout de 3.5s) e com recurso a fallback matemático determinístico (matriz de distâncias Haversine sobre os 25 concelhos de referência de Portugal). A interface aplica o concelho automaticamente no dropdown/pesquisa e apresenta um badge de zona ativa com remoção num clique.
+- **ADR-011 (2026-10-05):** Implementação de Geolocalização Nativa com Reverse Geocoding Híbrido. Adicionado à barra de filtros o botão "A minha localização" que aciona a API de Geolocation do browser (`navigator.geolocation.getCurrentPosition`). A latitude e longitude são resolvidas no servidor através de `/api/geocode/reverse` usando Nominatim OpenStreetMap (com timeout de 3.5s) e com recurso a fallback matemático determinístico (matriz de distâncias Haversine sobre os 25 concelhos de referência de Portugal).
+- **ADR-012 (2026-10-05):** Implementação de Procura por Raio Geográfico e Ordenação por Proximidade. Ao ativar a localização, a aplicação apresenta seletores rápidos de raio (5 km, 10 km, 25 km, 50 km, 100 km ou Todo o País) que filtram os imóveis em tempo real com base na fórmula de Haversine (`src/lib/geo.ts`). Os cartões de imóveis passam a exibir a distância exata em km (ex.: "a 7.1 km"), é adicionada a opção de ordenação "Mais Próximos de Mim", e a distância é incluída nos dossiês CSV exportados.
 
 ---
 
-## O que já funciona (v0.5.0)
+## O que já funciona (v0.6.0)
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
-- **Geolocalização "Obter a minha localização":** Deteção imediata da zona do utilizador com botão dedicado no campo de pesquisa, cálculo do concelho mais próximo e aplicação imediata aos filtros com badge de zona detetada.
-- **Exportação de Dossiê em CSV:** Botão integrado na barra de filtros para descarregar a listagem filtrada de imóveis em formato Excel/Sheets com todas as métricas calculadas (€/m², desvios, link original).
+- **Procura por Raio Geográfico:** Seleção de raio (5 km a 100 km) em redor da localização do utilizador, permitindo encontrar oportunidades em concelhos limítrofes.
+- **Ordenação por Proximidade:** Opção "📍 Mais Próximos de Mim" e indicação visual de distância em km em cada cartão de imóvel.
+- **Geolocalização "Obter a minha localização":** Deteção imediata da zona do utilizador com botão dedicado no campo de pesquisa e reverse geocoding híbrido.
+- **Exportação de Dossiê em CSV:** Botão integrado na barra de filtros para descarregar a listagem filtrada de imóveis em formato Excel/Sheets com todas as métricas calculadas (€/m², desvios, distância em km, link original).
 - **Prospeção em Tempo Real sob Demanda:** Botão "Ronda Horária" na barra superior que abre o `ScrapeProgressModal` com estado de recolha em direto, métricas (novos imóveis, descidas, alertas) e destaques de oportunidades.
 - Suite de scrapers reais para Imovirtual, CasaSAPO e Idealista integrada.
 - Modal de histórico de preços com linha temporal e variações registadas.

@@ -50,6 +50,9 @@ export interface Property {
   created_at: string;
   last_scraped_at: string;
   is_active: boolean;
+
+  // Distância calculada em relação à localização do utilizador
+  distance_km?: number;
 }
 
 export interface PropertyFilterParams {
@@ -65,5 +68,7 @@ export interface PropertyFilterParams {
   minArea?: number;
   maxArea?: number;
   maxPriceM2?: number;
-  sortBy?: "newest" | "opportunity_best" | "price_asc" | "price_desc" | "price_m2_asc";
+  sortBy?: "newest" | "opportunity_best" | "price_asc" | "price_desc" | "price_m2_asc" | "distance_asc";
+  userLocation?: { lat: number; lng: number } | null;
+  radiusKm?: number | null;
 }

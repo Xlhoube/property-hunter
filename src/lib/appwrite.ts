@@ -2,6 +2,7 @@ import { Client, Databases, Query, ID } from 'appwrite';
 import { Property, PropertyFilterParams } from '@/types/property';
 import { MarketZone, UserAlert } from '@/types/market';
 import { INITIAL_PROPERTIES, INITIAL_MARKET_ZONES } from '@/lib/mock-data';
+import { filterAndAttachDistance } from '@/lib/geo';
 
 const client = new Client();
 
@@ -102,7 +103,20 @@ export async function fetchProperties(filters?: PropertyFilterParams): Promise<P
     result = result.filter((p) => p.price_m2 <= filters.maxPriceM2!);
   }
 
+  // Filtragem e enriquecimento por raio de distância geográfica
+  if (filters?.userLocation && typeof filters.userLocation.lat === 'number' && typeof filters.userLocation.lng === 'number') {
+    result = filterAndAttachDistance(
+      result,
+      filters.userLocation.lat,
+      filters.userLocation.lng,
+      filters.radiusKm
+    );
+  }
+
   switch (filters?.sortBy) {
+    case 'distance_asc':
+      result.sort((a, b) => (a.distance_km ?? 999999) - (b.distance_km ?? 999999));
+      break;
     case 'opportunity_best':
       result.sort((a, b) => a.price_deviation_pct - b.price_deviation_pct);
       break;
