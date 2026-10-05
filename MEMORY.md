@@ -46,7 +46,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - Modal de histórico de preços com linha temporal e variações registadas.
 - Modal de configuração de alertas (concelho, orçamento máximo, tipologia, canal de envio).
 - Execução manual e agendada do serviço de prospecção horária (`/api/cron/scrape`).
-- Validação total de build e testes E2E executados pelo subagente browser.
+- Ambiente de testes local validado e funcional em `http://localhost:3005`.
 
 ---
 
