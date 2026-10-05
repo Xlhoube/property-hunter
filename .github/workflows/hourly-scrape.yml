@@ -1,0 +1,45 @@
+name: Prospecção Imobiliária Horária (Property Hunter)
+
+on:
+  schedule:
+    # Executa automaticamente a cada hora (ao minuto 0)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Permite disparo manual com 1 clique no separador Actions do GitHub
+
+jobs:
+  scrape-and-alert:
+    name: Executar Prospecção e Disparo de Alertas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar Endpoint de Prospecção na Vercel
+        env:
+          APP_URL: ${{ secrets.VERCEL_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          echo "A iniciar ronda de prospeccao imobiliaria..."
+
+          # Define o URL alvo (prioridade à Secret VERCEL_APP_URL configurada no GitHub)
+          if [ -z "$APP_URL" ]; then
+            echo "Aviso: VERCEL_APP_URL ainda nao foi definida nos Secrets do GitHub. A usar endpoint padrao."
+            TARGET_URL="https://property-hunter.vercel.app/api/cron/scrape"
+          else
+            TARGET_URL="${APP_URL%/}/api/cron/scrape"
+          fi
+
+          echo "A contactar: $TARGET_URL"
+
+          # Executa o pedido com o token Bearer de seguranca
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X GET "$TARGET_URL" \
+            -H "Authorization: Bearer $CRON_SECRET")
+
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d':' -f2)
+          BODY=$(echo "$RESPONSE" | grep -v "HTTP_STATUS")
+
+          echo "Resposta do servidor: $BODY"
+          echo "Codigo de Estado HTTP: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Prospeccao e envio de alertas concluidos com sucesso!"
+          else
+            echo "Nota: O servidor respondeu com codigo $HTTP_STATUS. Verifica se a Vercel ja terminou o deploy."
+          fi
