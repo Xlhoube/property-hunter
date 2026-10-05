@@ -55,3 +55,35 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+export function findZoneAveragePriceM2(
+  concelho: string,
+  freguesia: string,
+  zones: Array<{ concelho: string; freguesia: string; avg_price_m2: number }>
+): number {
+  const normConcelho = concelho.toLowerCase().trim();
+  const normFreguesia = freguesia.toLowerCase().trim();
+
+  // 1º Tentar correspondência exacta de freguesia e concelho
+  const exact = zones.find(
+    (z) => z.concelho.toLowerCase() === normConcelho && z.freguesia.toLowerCase() === normFreguesia
+  );
+  if (exact) return exact.avg_price_m2;
+
+  // 2º Tentar média pelo concelho
+  const byConcelho = zones.filter((z) => z.concelho.toLowerCase() === normConcelho);
+  if (byConcelho.length > 0) {
+    const sum = byConcelho.reduce((acc, curr) => acc + curr.avg_price_m2, 0);
+    return Math.round(sum / byConcelho.length);
+  }
+
+  // Fallbacks por concelho conhecido
+  if (normConcelho.includes('lisboa')) return 4400;
+  if (normConcelho.includes('cascais')) return 4900;
+  if (normConcelho.includes('porto')) return 3200;
+  if (normConcelho.includes('braga')) return 1950;
+  if (normConcelho.includes('coimbra')) return 2100;
+  if (normConcelho.includes('faro')) return 3100;
+
+  return 2500;
+}

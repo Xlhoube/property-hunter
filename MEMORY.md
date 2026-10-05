@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.2.0
+- **Versão Actual:** v0.3.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -27,7 +27,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `price_history`: Registo histórico temporal de alterações de preço por imóvel.
     - `market_zones`: Tabela de referência de preço médio por metro quadrado por zona geográfica (Lisboa, Porto, Cascais, Braga, Coimbra, Faro).
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
-- **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via Vercel Cron Jobs (`0 * * * *` invocando `/api/cron/scrape`).
+- **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions e Vercel Cron Jobs (`0 * * * *` e `0 8 * * *`).
+- **Scrapers Nativos:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio) e Idealista (suporte a gateway anti-bloqueio).
 - **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
 
 ---
@@ -40,6 +41,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-005 (2026-10-05):** Implementação do despachante universal de notificações multicanal (Telegram Bot API e Discord Webhooks) integrado no motor de prospecção e no modal de subscrição de alertas com botão de teste imediato.
 - **ADR-006 (2026-10-05):** Adopção do "Modo Simples" no modal de alertas. Elimina atrito técnico para o utilizador comum através de convite directo para o servidor oficial Discord da plataforma e botão directo para o bot do Telegram, mantendo opção de Webhook apenas para administradores/avançados.
 - **ADR-007 (2026-10-05):** Resolução da limitação de agendamentos no plano gratuito da Vercel (Hobby). O ficheiro `vercel.json` foi ajustado para execução diária (`0 8 * * *`), e foi criado o workflow `.github/workflows/hourly-scrape.yml` no GitHub Actions para garantir prospecção horária autónoma (`0 * * * *`) e disparos manuais sob demanda sem qualquer custo adicional.
+- **ADR-008 (2026-10-05):** Implementação da suite de crawlers reais para os portais imobiliários portugueses em `src/lib/scrapers/` (Imovirtual com extracção estruturada via `__NEXT_DATA__`, CasaSAPO com parsing de cards e características com `cheerio`, e Idealista com suporte a proxy anti-bloqueio). Integração no serviço horário com deduplicação, cálculo automático de €/m² e disparo de alertas.
 
 ---
 

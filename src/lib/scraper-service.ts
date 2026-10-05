@@ -1,7 +1,8 @@
 import { Property } from '@/types/property';
-import { calculatePriceM2, calculatePriceDeviation, determineOpportunityRating, determinePriceChange } from '@/lib/market-analysis';
+import { determinePriceChange } from '@/lib/market-analysis';
 import { addOrUpdatePropertyInMemory, fetchProperties, fetchActiveAlerts } from '@/lib/appwrite';
 import { dispatchPropertyNotification } from '@/lib/notification-service';
+import { scrapeAllPortals } from './scrapers';
 
 export interface ScraperResult {
   timestamp: string;
@@ -13,142 +14,123 @@ export interface ScraperResult {
   details: string[];
 }
 
-
 export async function runHourlyScraper(): Promise<ScraperResult> {
-  console.log('[Property Hunter] Iniciando ronda horária de prospecção nos portais...');
-  
+  console.log('[Property Hunter] Iniciando ronda horária de prospecção real nos portais (Imovirtual, CasaSAPO, Idealista)...');
+
   const currentProperties = await fetchProperties();
   const activeAlerts = await fetchActiveAlerts();
   const timestamp = new Date().toISOString();
-  
+
   let newCount = 0;
   let updatedCount = 0;
   let dropsCount = 0;
   let notificationsSent = 0;
   const details: string[] = [];
 
-  const candidateChanges = [
-    {
-      source_id: 'idl_98471203',
-      new_price: 379000,
-    },
-    {
-      source_id: 'sap_11029381',
-      new_price: 139000,
-    }
-  ];
+  try {
+    const portalReport = await scrapeAllPortals(['Lisboa', 'Porto', 'Cascais', 'Braga'], 15);
+    console.log(`[Scraper Service] Crawlers concluídos: ${portalReport.normalized_properties.length} imóveis recolhidos.`);
 
-  for (const change of candidateChanges) {
-    const existing = currentProperties.find((p) => p.source_id === change.source_id);
-    if (existing && existing.price !== change.new_price) {
-      const prevPrice = existing.price;
-      const newPrice = change.new_price;
-      const changeStats = determinePriceChange(newPrice, prevPrice);
-
-      const updatedPriceM2 = calculatePriceM2(newPrice, existing.area_m2);
-      const updatedDev = calculatePriceDeviation(updatedPriceM2, existing.zone_avg_price_m2);
-      const updatedOpp = determineOpportunityRating(updatedDev);
-
-      const history = existing.price_history ? [...existing.price_history] : [];
-      history.push({
-        id: 'ph_' + Date.now(),
-        property_id: existing.id,
-        price: newPrice,
-        price_m2: updatedPriceM2,
-        recorded_at: timestamp,
-      });
-
-      const updatedProp: Property = {
-        ...existing,
-        price: newPrice,
-        previous_price: prevPrice,
-        price_m2: updatedPriceM2,
-        price_deviation_pct: updatedDev,
-        opportunity_rating: updatedOpp,
-        price_change_type: changeStats.type,
-        price_change_amount: changeStats.amount,
-        price_change_pct: changeStats.pct,
-        price_history: history,
-        last_scraped_at: timestamp,
-      };
-
-      addOrUpdatePropertyInMemory(updatedProp);
-      updatedCount++;
-      if (changeStats.type === 'drop') dropsCount++;
-
-      details.push(
-        `Imóvel ${existing.title.slice(0, 30)}... baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
+    for (const scraped of portalReport.normalized_properties) {
+      const existing = currentProperties.find(
+        (p) => p.source_id === scraped.source_id || p.original_url === scraped.original_url
       );
 
-      // Disparar notificações para alertas que cubram este concelho
-      for (const alert of activeAlerts) {
-        if (!alert.concelho || alert.concelho === 'Todos' || alert.concelho.toLowerCase() === updatedProp.concelho.toLowerCase()) {
-          const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
-          if (destination) {
-            await dispatchPropertyNotification({
-              channel: alert.channel,
-              destination,
-              property: updatedProp,
-              alertReason: 'price_drop',
-            });
-            notificationsSent++;
+      if (existing) {
+        // Imóvel já existente: verificar se o preço alterou
+        if (existing.price !== scraped.price) {
+          const prevPrice = existing.price;
+          const newPrice = scraped.price;
+          const changeStats = determinePriceChange(newPrice, prevPrice);
+
+          const history = existing.price_history ? [...existing.price_history] : [];
+          history.push({
+            id: 'ph_' + Date.now(),
+            property_id: existing.id,
+            price: newPrice,
+            price_m2: scraped.price_m2,
+            recorded_at: timestamp,
+          });
+
+          const updatedProp: Property = {
+            ...existing,
+            price: newPrice,
+            previous_price: prevPrice,
+            price_m2: scraped.price_m2,
+            price_deviation_pct: scraped.price_deviation_pct,
+            opportunity_rating: scraped.opportunity_rating,
+            price_change_type: changeStats.type,
+            price_change_amount: changeStats.amount,
+            price_change_pct: changeStats.pct,
+            price_history: history,
+            last_scraped_at: timestamp,
+          };
+
+          addOrUpdatePropertyInMemory(updatedProp);
+          updatedCount++;
+          if (changeStats.type === 'drop') dropsCount++;
+
+          details.push(
+            `[Baixa de Preço] ${updatedProp.title.slice(0, 35)}... em ${updatedProp.concelho} baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
+          );
+
+          // Disparar notificações para alertas subscritos
+          for (const alert of activeAlerts) {
+            if (
+              !alert.concelho ||
+              alert.concelho === 'Todos' ||
+              alert.concelho.toLowerCase() === updatedProp.concelho.toLowerCase()
+            ) {
+              const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
+              if (destination) {
+                await dispatchPropertyNotification({
+                  channel: alert.channel,
+                  destination,
+                  property: updatedProp,
+                  alertReason: 'price_drop',
+                });
+                notificationsSent++;
+              }
+            }
+          }
+        }
+      } else {
+        // Novo imóvel detectado no portal
+        addOrUpdatePropertyInMemory(scraped);
+        newCount++;
+
+        if (scraped.opportunity_rating === 'good') {
+          details.push(
+            `[Oportunidade] ${scraped.title.slice(0, 35)} em ${scraped.concelho}: ${scraped.price}€ (${scraped.price_deviation_pct}% abaixo da média)`
+          );
+        }
+
+        // Disparar notificações para novos imóveis com Bom Preço
+        for (const alert of activeAlerts) {
+          if (
+            !alert.concelho ||
+            alert.concelho === 'Todos' ||
+            alert.concelho.toLowerCase() === scraped.concelho.toLowerCase()
+          ) {
+            if (!alert.only_good_deals || scraped.opportunity_rating === 'good') {
+              const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
+              if (destination) {
+                await dispatchPropertyNotification({
+                  channel: alert.channel,
+                  destination,
+                  property: scraped,
+                  alertReason: 'new_opportunity',
+                });
+                notificationsSent++;
+              }
+            }
           }
         }
       }
     }
-  }
-
-  const newCandidate: Property = {
-    id: 'prop_new_' + Date.now(),
-    source_id: 'idl_new_' + Math.floor(Math.random() * 900000 + 100000),
-    source_portal: 'Idealista',
-    original_url: 'https://www.idealista.pt/imovel/99812401/',
-    title: 'Apartamento T2 em Arroios com Terraço Privativo',
-    description: 'Imóvel acabado de entrar no mercado! Remodelação moderna a estrear, cozinha equipada e terraço de 18m².',
-    price: 295000,
-    area_m2: 82,
-    price_m2: 3597,
-    zone_avg_price_m2: 4350,
-    price_deviation_pct: -17.3,
-    opportunity_rating: 'good',
-    typology: 'T2',
-    condition: 'Novo',
-    address: 'Rua Pascoal de Melo',
-    freguesia: 'Arroios',
-    concelho: 'Lisboa',
-    district: 'Lisboa',
-    cover_image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
-    price_change_type: 'none',
-    price_history: [
-      { id: 'ph_new_1', property_id: 'prop_new_' + Date.now(), price: 295000, price_m2: 3597, recorded_at: timestamp },
-    ],
-    created_at: timestamp,
-    last_scraped_at: timestamp,
-    is_active: true,
-  };
-
-  if (!currentProperties.some((p) => p.title === newCandidate.title)) {
-    addOrUpdatePropertyInMemory(newCandidate);
-    newCount++;
-    details.push(`Novo imóvel detectado: ${newCandidate.title} em ${newCandidate.concelho} por ${newCandidate.price}€`);
-
-    // Disparar notificações para novo imóvel se for bom negócio
-    for (const alert of activeAlerts) {
-      if (!alert.concelho || alert.concelho === 'Todos' || alert.concelho.toLowerCase() === newCandidate.concelho.toLowerCase()) {
-        if (!alert.only_good_deals || newCandidate.opportunity_rating === 'good') {
-          const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
-          if (destination) {
-            await dispatchPropertyNotification({
-              channel: alert.channel,
-              destination,
-              property: newCandidate,
-              alertReason: 'new_opportunity',
-            });
-            notificationsSent++;
-          }
-        }
-      }
-    }
+  } catch (err) {
+    console.error('[Scraper Service] Erro na execução dos crawlers reais:', err);
+    details.push(`Erro na execução dos crawlers: ${String(err)}`);
   }
 
   return {
