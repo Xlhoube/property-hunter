@@ -237,7 +237,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                       Não precisas de configurar nada! Entra no servidor oficial e recebe alertas organizados em canais automáticos por concelho (<code className="text-indigo-700 font-semibold bg-white/70 px-1 py-0.5 rounded">#{concelho.toLowerCase()}</code>).
                     </p>
                     <a
-                      href="https://discord.gg/propertyhunter"
+                      href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
@@ -319,13 +319,13 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
                 <div className="flex gap-2">
                   <a
-                    href="https://t.me/BotFather"
+                    href="https://t.me/OmeuPropertyHunterBot"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-1 rounded-xl bg-sky-600 hover:bg-sky-700 py-2 px-3 text-xs font-bold text-white shadow-xs transition-colors shrink-0 cursor-pointer"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
-                    <span>Abrir Bot</span>
+                    <span>Abrir Bot (@OmeuPropertyHunterBot)</span>
                   </a>
                   <input
                     type="text"
