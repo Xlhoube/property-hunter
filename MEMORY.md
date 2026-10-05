@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.8.0
+- **Versão Actual:** v0.9.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -28,7 +28,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `market_zones`: Tabela de referência de preço médio por metro quadrado por zona geográfica (Lisboa, Porto, Cascais, Braga, Coimbra, Faro).
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
 - **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions a cada 12 horas (`0 8,20 * * *`) e Vercel Cron diária (`0 8 * * *`).
-- **Scrapers Nativos:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio) e Idealista (suporte a gateway anti-bloqueio).
+- **Scrapers Nativos & Fontes Extensíveis:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio), Idealista (suporte a gateway anti-bloqueio) e gestão dinâmica de fontes adicionais (SuperCasa, CustoJusto, ERA, Remax e personalizadas).
 - **Geocodificação & Proximidade:** Módulo geoespacial nativo (`src/lib/geo.ts`) com cálculo da distância esférica Haversine, suporte a coordenadas de referência de concelhos e endpoint híbrido (`/api/geocode/reverse`).
 - **Exportação & Relatórios:** Utilitário nativo de exportação de dossiê de investimentos em formato CSV compatível com Excel europeu (delimitador `;` e codificação UTF-8 BOM), incluindo distância calculada quando ativa.
 - **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
@@ -50,10 +50,12 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-012 (2026-10-05):** Implementação de Procura por Raio Geográfico e Ordenação por Proximidade. Ao ativar a localização, a aplicação apresenta seletores rápidos de raio (5 km, 10 km, 25 km, 50 km, 100 km ou Todo o País) que filtram os imóveis em tempo real com base na fórmula de Haversine (`src/lib/geo.ts`). Os cartões de imóveis passam a exibir a distância exata em km (ex.: "a 7.1 km"), é adicionada a opção de ordenação "Mais Próximos de Mim", e a distância é incluída nos dossiês CSV exportados.
 - **ADR-013 (2026-10-05):** Implementação de Modo Escuro Integral com Suporte a Tailwind CSS v4 e Zero FOUC. Criado `ThemeProvider` com contexto React e hook `useTheme()`, sincronização em `localStorage` (`property_hunter_theme`) e leitura das preferências de sistema (`prefers-color-scheme`). Configurada a directiva `@custom-variant dark (&:where(.dark, .dark *));` no Tailwind v4 para propagação da classe `.dark` no elemento raiz `<html>`, com script síncrono no `<head>` de `layout.tsx` para eliminar flashes brancos. Adaptados integralmente todos os componentes (Navbar, MarketStatBanner, FilterBar, PropertyCard, modais e rodapé) com paleta Slate escuro (`dark:bg-slate-950`, `dark:bg-slate-900`, `dark:border-slate-800`).
 - **ADR-014 (2026-10-05):** Otimização Mobile-First e Menu Responsivo para Smartphones. Redesenhada a barra de navegação (`Navbar.tsx`) com gaveta móvel expansível via botão hambúrguer (`Menu`/`X`), integrando os atalhos de ronda nos portais, configuração de alertas e estado da última ronda em botões táteis largos (touch targets ≥40px). Otimizado o `MarketStatBanner.tsx` com disposição 2x2 sem cortes de texto, a `FilterBar.tsx` com grelha móvel em 2 colunas para seletores e carrosséis horizontais táteis (`no-scrollbar`) para raios e tipologias. Modais adaptados com altura máxima segura (`max-h-[92vh]`), cabeçalho e rodapé fixos e scroll interno suave.
+- **ADR-015 (2026-10-05):** Página Dedicada para Escolha e Adição de Fontes de Pesquisa (`/fontes`). Criada interface completa para gerir que portais imobiliários participam na ronda periódica de 12 horas. Permite ativar ou pausar portais existentes com um clique (Idealista, Imovirtual, CasaSAPO, SuperCasa, CustoJusto, ERA e Remax), testar a conectividade em tempo real com indicador de latência HTTP (`/api/sources/test`), e registar novas fontes de pesquisa personalizadas através de modal tátil com validação de URL, padrão de localização `{concelho}` e seleção de frequência.
 
 ---
 
-## O que já funciona (v0.8.0)
+## O que já funciona (v0.9.0)
+- **Gestão de Fontes de Pesquisa (`/fontes`):** Página dedicada para escolher portais ativos na ronda, alternadores instantâneos (*toggle switch*), teste de conectividade em tempo real e formulário para adicionar novas fontes personalizadas.
 - **Otimização Mobile-First Integral:** Barra de navegação com menu hambúrguer responsivo para telemóveis, banners de métricas 2x2 perfeitamente enquadrados, filtros táteis com scroll horizontal nativo e modais com rolagem suave que não quebram em ecrãs estreitos (320px a 420px).
 - **Modo Escuro (Dark Mode):** Alternador no cabeçalho com transição suave, persistência no navegador, deteção do sistema operativo e paleta Slate premium adaptada em todos os ecrãs e modais.
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
