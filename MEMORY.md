@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.3.0
+- **Versão Actual:** v0.4.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -29,6 +29,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
 - **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions e Vercel Cron Jobs (`0 * * * *` e `0 8 * * *`).
 - **Scrapers Nativos:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio) e Idealista (suporte a gateway anti-bloqueio).
+- **Exportação & Relatórios:** Utilitário nativo de exportação de dossiê de investimentos em formato CSV compatível com Excel europeu (delimitador `;` e codificação UTF-8 BOM).
 - **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
 
 ---
@@ -42,13 +43,17 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-006 (2026-10-05):** Adopção do "Modo Simples" no modal de alertas. Elimina atrito técnico para o utilizador comum através de convite directo para o servidor oficial Discord da plataforma e botão directo para o bot do Telegram, mantendo opção de Webhook apenas para administradores/avançados.
 - **ADR-007 (2026-10-05):** Resolução da limitação de agendamentos no plano gratuito da Vercel (Hobby). O ficheiro `vercel.json` foi ajustado para execução diária (`0 8 * * *`), e foi criado o workflow `.github/workflows/hourly-scrape.yml` no GitHub Actions para garantir prospecção horária autónoma (`0 * * * *`) e disparos manuais sob demanda sem qualquer custo adicional.
 - **ADR-008 (2026-10-05):** Implementação da suite de crawlers reais para os portais imobiliários portugueses em `src/lib/scrapers/` (Imovirtual com extracção estruturada via `__NEXT_DATA__`, CasaSAPO com parsing de cards e características com `cheerio`, e Idealista com suporte a proxy anti-bloqueio). Integração no serviço horário com deduplicação, cálculo automático de €/m² e disparo de alertas.
+- **ADR-009 (2026-10-05):** Implementação do Modal de Prospeção em Tempo Real (`ScrapeProgressModal`) e Exportação de Dossiê Imobiliário CSV (`exportPropertiesToCSV`). O utilizador pode agora acionar a varredura sob demanda a partir da navbar com acompanhamento em direto dos 3 portais (novos anúncios, baixas de preço e alertas), bem como descarregar a qualquer momento a lista filtrada de oportunidades formatada para Excel europeu com caracteres em Português de Portugal.
 
 ---
 
-## O que já funciona (v0.2.0)
+## O que já funciona (v0.4.0)
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
+- **Exportação de Dossiê em CSV:** Botão integrado na barra de filtros para descarregar a listagem filtrada de imóveis em formato Excel/Sheets com todas as métricas calculadas (€/m², desvios, link original).
+- **Prospeção em Tempo Real sob Demanda:** Botão "Ronda Horária" na barra superior que abre o `ScrapeProgressModal` com estado de recolha em direto, métricas (novos imóveis, descidas, alertas) e destaques de oportunidades.
+- Suite de scrapers reais para Imovirtual, CasaSAPO e Idealista integrada.
 - Modal de histórico de preços com linha temporal e variações registadas.
 - Modal de configuração e teste de alertas com "Modo Simples" sem atrito: convite com 1 clique para servidor Discord oficial e botão directo para Telegram.
 - Botão "Testar Envio" no modal de alertas com diagnóstico e feedback instantâneo.
@@ -56,10 +61,9 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - Rota de teste dedicada `/api/alerts/test` com modo de simulação e suporte a credenciais reais.
 - Ambiente de testes local validado e funcional em `http://localhost:3005`.
 
-
 ---
 
 ## Próximos Passos
-1. Inserir chaves reais no `.env.local` (`TELEGRAM_BOT_TOKEN`, `APPWRITE_API_KEY`).
-2. Adicionar scrapers reais por portal imobiliário (Idealista, Imovirtual, CasaSAPO) com respeito pelas políticas de robots.txt e normalização de dados.
-3. Exportação de listagens e dossiês de oportunidade para formato CSV / PDF para apresentação a investidores.
+- Configuração do link de convite permanente do servidor oficial Discord no `.env.local` (`NEXT_PUBLIC_DISCORD_INVITE_URL`).
+- Adicionar filtros avançados por intervalo de valores (ex: Preço Mín/Máx em € e Área Mín/Máx em m²).
+- Conectar chaves da Appwrite quando o utilizador pretender persistência na cloud.

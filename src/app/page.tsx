@@ -7,14 +7,21 @@ import { FilterBar } from '@/components/FilterBar';
 import { PropertyCard } from '@/components/PropertyCard';
 import { PriceHistoryModal } from '@/components/PriceHistoryModal';
 import { AlertModal } from '@/components/AlertModal';
+import { ScrapeProgressModal } from '@/components/ScrapeProgressModal';
 import { Property, PropertyFilterParams } from '@/types/property';
 import { fetchProperties } from '@/lib/appwrite';
+import { exportPropertiesToCSV } from '@/lib/export-csv';
+import { ScraperResult } from '@/lib/scraper-service';
 import { Building, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScraping, setIsScraping] = useState(false);
+  const [isScrapeModalOpen, setIsScrapeModalOpen] = useState(false);
+  const [scrapeResult, setScrapeResult] = useState<ScraperResult | null>(null);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
+
   const [lastScrapedTime, setLastScrapedTime] = useState('há poucos minutos');
   const [selectedHistoryProperty, setSelectedHistoryProperty] = useState<Property | null>(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
@@ -51,17 +58,32 @@ export default function HomePage() {
 
   const handleTriggerScrape = async () => {
     setIsScraping(true);
+    setIsScrapeModalOpen(true);
+    setScrapeResult(null);
+    setScrapeError(null);
+
     try {
       const res = await fetch('/api/cron/scrape', { method: 'POST' });
-      if (res.ok) {
+      const json = await res.json();
+
+      if (res.ok && json.success) {
         setLastScrapedTime('agora mesmo');
+        setScrapeResult(json.data);
         await loadProperties(filters);
+      } else {
+        setScrapeError(json.error || 'Falha ao executar a prospeção nos portais');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro na ronda horaria:', err);
+      setScrapeError(err.message || 'Erro de comunicação com o servidor de prospeção');
     } finally {
       setIsScraping(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    const concelhoSlug = filters.concelho && filters.concelho !== 'Todos' ? filters.concelho.toLowerCase() : 'portugal';
+    exportPropertiesToCSV(properties, `oportunidades-${concelhoSlug}`);
   };
 
   return (
@@ -81,6 +103,8 @@ export default function HomePage() {
             filters={filters}
             onChange={setFilters}
             availableConcelhos={availableConcelhos}
+            onExportCSV={handleExportCSV}
+            totalCount={properties.length}
           />
 
           {isLoading ? (
@@ -151,6 +175,15 @@ export default function HomePage() {
         isOpen={isAlertModalOpen}
         onClose={() => setIsAlertModalOpen(false)}
         availableConcelhos={availableConcelhos}
+      />
+
+      <ScrapeProgressModal
+        isOpen={isScrapeModalOpen}
+        onClose={() => setIsScrapeModalOpen(false)}
+        isRunning={isScraping}
+        result={scrapeResult}
+        error={scrapeError}
+        onTriggerScrapeAgain={handleTriggerScrape}
       />
     </div>
   );

@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Search, ArrowUpDown, TrendingDown } from 'lucide-react';
+import { Search, ArrowUpDown, TrendingDown, Download } from 'lucide-react';
 import { PropertyFilterParams, PropertyTypology } from '@/types/property';
 
 interface FilterBarProps {
   filters: PropertyFilterParams;
   onChange: (newFilters: PropertyFilterParams) => void;
   availableConcelhos: string[];
+  onExportCSV?: () => void;
+  totalCount?: number;
 }
 
 const TYPOLOGIES: PropertyTypology[] = ['T0', 'T1', 'T2', 'T3', 'T4+', 'Moradia'];
@@ -16,6 +18,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   filters,
   onChange,
   availableConcelhos,
+  onExportCSV,
+  totalCount,
 }) => {
   const handleTypologyToggle = (typ: PropertyTypology) => {
     const current = filters.typologies || [];
@@ -118,6 +122,17 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="fair">🟡 Dentro do Preço (±10%)</option>
             <option value="bad">🔴 Acima do Mercado</option>
           </select>
+
+          {onExportCSV && (
+            <button
+              onClick={onExportCSV}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white py-1 px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer ml-auto sm:ml-0"
+              title="Descarregar dossiê em formato CSV para Excel com todas as métricas"
+            >
+              <Download className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Exportar Dossiê {totalCount ? `(${totalCount})` : ''}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
