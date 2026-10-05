@@ -38,6 +38,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-003 (2026-10-05):** Implementação de camada de persistência híbrida com fallback em memória. Permite execução imediata local com 10 imóveis realistas e 12 zonas de Portugal sem bloqueio de arranque antes da introdução das chaves Appwrite.
 - **ADR-004 (2026-10-05):** Validação de testes no ecrã e aprovação do ambiente local em http://localhost:3005 pelo utilizador, confirmando o carregamento dos cartões de imóveis, histórico de preços e filtros interactivos.
 - **ADR-005 (2026-10-05):** Implementação do despachante universal de notificações multicanal (Telegram Bot API e Discord Webhooks) integrado no motor de prospecção e no modal de subscrição de alertas com botão de teste imediato.
+- **ADR-006 (2026-10-05):** Adopção do "Modo Simples" no modal de alertas. Elimina atrito técnico para o utilizador comum através de convite directo para o servidor oficial Discord da plataforma e botão directo para o bot do Telegram, mantendo opção de Webhook apenas para administradores/avançados.
 
 ---
 
@@ -46,11 +47,12 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
 - Modal de histórico de preços com linha temporal e variações registadas.
-- Modal de configuração e teste de alertas com suporte a Telegram (Chat ID / Webhook), Discord (Webhook) e Email.
+- Modal de configuração e teste de alertas com "Modo Simples" sem atrito: convite com 1 clique para servidor Discord oficial e botão directo para Telegram.
 - Botão "Testar Envio" no modal de alertas com diagnóstico e feedback instantâneo.
 - Execução manual e agendada do serviço de prospecção horária (`/api/cron/scrape`) com disparo automático de alertas para utilizadores subscritos.
 - Rota de teste dedicada `/api/alerts/test` com modo de simulação e suporte a credenciais reais.
 - Ambiente de testes local validado e funcional em `http://localhost:3005`.
+
 
 ---
 

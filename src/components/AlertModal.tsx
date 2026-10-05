@@ -1,7 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Bell, Check, Send, RefreshCw, AlertCircle, Zap } from 'lucide-react';
+import {
+  X,
+  Bell,
+  Check,
+  Send,
+  RefreshCw,
+  AlertCircle,
+  Zap,
+  ExternalLink,
+  Users,
+  ShieldCheck,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { createAlert } from '@/lib/appwrite';
 
 interface AlertModalProps {
@@ -16,11 +28,14 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   availableConcelhos,
 }) => {
   const [concelho, setConcelho] = useState(availableConcelhos[0] || 'Lisboa');
-  const [channel, setChannel] = useState<'email' | 'telegram' | 'discord'>('telegram');
+  const [channel, setChannel] = useState<'discord' | 'telegram' | 'email'>('discord');
   const [contact, setContact] = useState('');
   const [onlyGoodDeals, setOnlyGoodDeals] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Modo avançado (apenas se o utilizador quiser colar o seu próprio Webhook no Discord)
+  const [showAdvancedWebhook, setShowAdvancedWebhook] = useState(false);
 
   // Estado para teste de notificação
   const [isTesting, setIsTesting] = useState(false);
@@ -32,7 +47,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     if (!contact.trim()) {
       setTestResult({
         success: false,
-        message: 'Preenche primeiro o teu destino de contacto antes de testar.',
+        message: 'Preenche primeiro o teu contacto ou ID antes de testar.',
       });
       return;
     }
@@ -82,7 +97,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         concelho,
         channel,
         user_email: channel === 'email' ? contact.trim() : undefined,
-        webhook_url: channel !== 'email' ? contact.trim() : undefined,
+        webhook_url: channel === 'discord' ? (contact.trim() || 'official_discord_server') : undefined,
         typologies: ['T1', 'T2', 'T3'],
         only_good_deals: onlyGoodDeals,
         is_active: true,
@@ -92,7 +107,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       setTimeout(() => {
         setIsSuccess(false);
         onClose();
-      }, 1500);
+      }, 1800);
     } catch (err) {
       console.error('Erro ao criar alerta:', err);
     } finally {
@@ -131,8 +146,8 @@ export const AlertModal: React.FC<AlertModalProps> = ({
               <Check className="h-6 w-6" />
             </div>
             <h4 className="text-base font-bold text-slate-900">Alerta Criado com Sucesso!</h4>
-            <p className="text-xs text-slate-500 mt-1">
-              Vais receber notificações para o concelho de {concelho}.
+            <p className="text-xs text-slate-500 mt-1 max-w-xs">
+              Vais receber notificações automáticas para as oportunidades de {concelho}.
             </p>
           </div>
         ) : (
@@ -144,7 +159,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
               <select
                 value={concelho}
                 onChange={(e) => setConcelho(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200 cursor-pointer"
               >
                 {availableConcelhos.map((c) => (
                   <option key={c} value={c}>
@@ -159,94 +174,213 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 Canal de Notificação
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {(['telegram', 'discord', 'email'] as const).map((ch) => (
-                  <button
-                    key={ch}
-                    type="button"
-                    onClick={() => {
-                      setChannel(ch);
-                      setTestResult(null);
-                    }}
-                    className={`rounded-lg py-2 text-center font-medium capitalize border transition-all cursor-pointer ${
-                      channel === ch
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {ch}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block font-semibold text-slate-700">
-                  {channel === 'email'
-                    ? 'O teu Endereço de Email'
-                    : channel === 'telegram'
-                    ? 'Chat ID ou Webhook do Telegram'
-                    : 'URL do Webhook do Discord'}
-                </label>
                 <button
+                  key="discord"
                   type="button"
-                  onClick={handleTestNotification}
-                  disabled={isTesting || !contact.trim()}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  {isTesting ? (
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Zap className="h-3 w-3" />
-                  )}
-                  <span>Testar Envio</span>
-                </button>
-              </div>
-
-              <input
-                type={channel === 'email' ? 'email' : 'text'}
-                required
-                placeholder={
-                  channel === 'email'
-                    ? 'exemplo@email.com'
-                    : channel === 'telegram'
-                    ? 'ex: 987654321 ou https://api.telegram.org/...'
-                    : 'https://discord.com/api/webhooks/...'
-                }
-                value={contact}
-                onChange={(e) => {
-                  setContact(e.target.value);
-                  setTestResult(null);
-                }}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200"
-              />
-
-              <p className="mt-1 text-[11px] text-slate-500">
-                {channel === 'telegram' &&
-                  '💡 Dica: No Telegram, podes obter o teu Chat ID enviando /start para o bot @userinfobot.'}
-                {channel === 'discord' &&
-                  '💡 Dica: No teu servidor Discord, vai a Definições do Canal > Integrações > Criar Webhook e copia o link.'}
-                {channel === 'email' &&
-                  '💡 Dica: Recebe um resumo formatado directamente na tua caixa de correio.'}
-              </p>
-
-              {testResult && (
-                <div
-                  className={`mt-2 flex items-start gap-2 rounded-xl p-2.5 text-[11px] ${
-                    testResult.success
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  onClick={() => {
+                    setChannel('discord');
+                    setTestResult(null);
+                  }}
+                  className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    channel === 'discord'
+                      ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  {testResult.success ? (
-                    <Check className="h-3.5 w-3.5 mt-0.5 text-emerald-600 shrink-0" />
-                  ) : (
-                    <AlertCircle className="h-3.5 w-3.5 mt-0.5 text-rose-600 shrink-0" />
-                  )}
-                  <span>{testResult.message}</span>
-                </div>
-              )}
+                  <span>Discord</span>
+                </button>
+
+                <button
+                  key="telegram"
+                  type="button"
+                  onClick={() => {
+                    setChannel('telegram');
+                    setTestResult(null);
+                  }}
+                  className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    channel === 'telegram'
+                      ? 'border-sky-500 bg-sky-500 text-white shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>Telegram</span>
+                </button>
+
+                <button
+                  key="email"
+                  type="button"
+                  onClick={() => {
+                    setChannel('email');
+                    setTestResult(null);
+                  }}
+                  className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    channel === 'email'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span>Email</span>
+                </button>
+              </div>
             </div>
+
+            {/* SELEÇÃO DO CANAL: MODO SIMPLES DISCORD */}
+            {channel === 'discord' && (
+              <div className="space-y-3">
+                {!showAdvancedWebhook ? (
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 text-slate-700 space-y-2.5">
+                    <div className="flex items-center gap-2 text-indigo-900 font-bold">
+                      <Users className="h-4 w-4 text-indigo-600" />
+                      <span>Comunidade Discord Property Hunter</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      Não precisas de configurar nada! Entra no servidor oficial e recebe alertas organizados em canais automáticos por concelho (<code className="text-indigo-700 font-semibold bg-white/70 px-1 py-0.5 rounded">#{concelho.toLowerCase()}</code>).
+                    </p>
+                    <a
+                      href="https://discord.gg/propertyhunter"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Entrar no Servidor Discord</span>
+                    </a>
+
+                    <div className="pt-1 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedWebhook(true)}
+                        className="text-[11px] text-slate-500 hover:text-indigo-600 underline cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <SlidersHorizontal className="h-3 w-3" />
+                        <span>Sou administrador e quero ligar o meu próprio canal (Webhook)</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block font-semibold text-slate-800">
+                        URL do teu Webhook Discord
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedWebhook(false)}
+                        className="text-[11px] text-indigo-600 hover:underline cursor-pointer"
+                      >
+                        Voltar ao modo simples
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://discord.com/api/webhooks/..."
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-300"
+                    />
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={handleTestNotification}
+                        disabled={isTesting || !contact.trim()}
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 disabled:opacity-40 cursor-pointer"
+                      >
+                        {isTesting ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+                        <span>Testar Webhook</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SELEÇÃO DO CANAL: TELEGRAM */}
+            {channel === 'telegram' && (
+              <div className="rounded-xl border border-sky-100 bg-sky-50/60 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sky-900 font-bold">
+                    <ShieldCheck className="h-4 w-4 text-sky-600" />
+                    <span>Alertas no Telemóvel (Telegram)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleTestNotification}
+                    disabled={isTesting || !contact.trim()}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 hover:text-sky-800 disabled:opacity-40 cursor-pointer"
+                  >
+                    {isTesting ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+                    <span>Testar</span>
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Para começares a receber, abre o bot no Telegram e clica em <b>Iniciar</b>. A seguir, indica o teu Chat ID ou contacto:
+                </p>
+
+                <div className="flex gap-2">
+                  <a
+                    href="https://t.me/BotFather"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1 rounded-xl bg-sky-600 hover:bg-sky-700 py-2 px-3 text-xs font-bold text-white shadow-xs transition-colors shrink-0 cursor-pointer"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>Abrir Bot</span>
+                  </a>
+                  <input
+                    type="text"
+                    required
+                    placeholder="O teu Chat ID (ex: 5004093342)"
+                    value={contact}
+                    onChange={(e) => {
+                      setContact(e.target.value);
+                      setTestResult(null);
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-300"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  💡 Podes descobrir o teu Chat ID enviando /start para o bot <code>@userinfobot</code>.
+                </p>
+              </div>
+            )}
+
+            {/* SELEÇÃO DO CANAL: EMAIL */}
+            {channel === 'email' && (
+              <div className="space-y-1.5">
+                <label className="block font-semibold text-slate-700">
+                  O teu Endereço de Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="exemplo@email.com"
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Recebe relatórios consolidados sempre que surgirem descidas de preço em {concelho}.
+                </p>
+              </div>
+            )}
+
+            {testResult && (
+              <div
+                className={`flex items-start gap-2 rounded-xl p-2.5 text-[11px] ${
+                  testResult.success
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                }`}
+              >
+                {testResult.success ? (
+                  <Check className="h-3.5 w-3.5 mt-0.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 text-rose-600 shrink-0" />
+                )}
+                <span>{testResult.message}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
               <input
