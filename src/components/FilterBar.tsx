@@ -1,7 +1,5 @@
-'use client';
-
-import React from 'react';
-import { Search, ArrowUpDown, TrendingDown, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, ArrowUpDown, TrendingDown, Download, LocateFixed, MapPin, X } from 'lucide-react';
 import { PropertyFilterParams, PropertyTypology } from '@/types/property';
 
 interface FilterBarProps {
@@ -21,12 +19,80 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onExportCSV,
   totalCount,
 }) => {
+  const [isLocating, setIsLocating] = useState(false);
+  const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
   const handleTypologyToggle = (typ: PropertyTypology) => {
     const current = filters.typologies || [];
     const next = current.includes(typ)
       ? current.filter((t) => t !== typ)
       : [...current, typ];
     onChange({ ...filters, typologies: next });
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('O teu navegador não suporta geolocalização.');
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+          const data = await res.json();
+
+          if (res.ok && data.success && data.concelho) {
+            const detected = data.concelho;
+            setDetectedLocation(detected);
+
+            // Procurar correspondência com a lista de concelhos disponíveis
+            const matched = availableConcelhos.find(
+              (c) => c.toLowerCase() === detected.toLowerCase() ||
+                     detected.toLowerCase().includes(c.toLowerCase()) ||
+                     c.toLowerCase().includes(detected.toLowerCase())
+            );
+
+            if (matched) {
+              onChange({ ...filters, concelho: matched, searchQuery: '' });
+            } else {
+              // Se não estiver na lista de concelhos directos, preenche a pesquisa por texto
+              onChange({ ...filters, concelho: 'Todos', searchQuery: detected });
+            }
+          } else {
+            setLocationError('Não foi possível identificar o concelho para estas coordenadas.');
+          }
+        } catch (err: any) {
+          setLocationError('Erro ao comunicar com o serviço de localização.');
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError('Permissão de localização recusada no navegador.');
+        } else if (error.code === error.TIMEOUT) {
+          setLocationError('Tempo limite excedido ao obter a localização.');
+        } else {
+          setLocationError('Não foi possível determinar a localização atual.');
+        }
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
+
+  const handleClearDetectedLocation = () => {
+    setDetectedLocation(null);
+    setLocationError(null);
+    onChange({ ...filters, concelho: 'Todos', searchQuery: '' });
   };
 
   return (
@@ -38,15 +104,37 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             type="text"
             placeholder="Pesquisar por freguesia, concelho ou palavra-chave..."
             value={filters.searchQuery || ''}
-            onChange={(e) => onChange({ ...filters, searchQuery: e.target.value })}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-100 transition-all"
+            onChange={(e) => {
+              if (detectedLocation) setDetectedLocation(null);
+              onChange({ ...filters, searchQuery: e.target.value });
+            }}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-36 sm:pr-40 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-100 transition-all"
           />
+
+          <button
+            type="button"
+            onClick={handleGetLocation}
+            disabled={isLocating}
+            className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer disabled:opacity-60"
+            title="Detetar a minha localização e filtrar imóveis mais próximos"
+          >
+            <LocateFixed className={`h-3.5 w-3.5 text-emerald-600 ${isLocating ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">
+              {isLocating ? 'A localizar...' : 'A minha localização'}
+            </span>
+            <span className="sm:hidden">
+              {isLocating ? '...' : 'Perto'}
+            </span>
+          </button>
         </div>
 
         <div className="md:col-span-3">
           <select
             value={filters.concelho || 'Todos'}
-            onChange={(e) => onChange({ ...filters, concelho: e.target.value })}
+            onChange={(e) => {
+              if (detectedLocation) setDetectedLocation(null);
+              onChange({ ...filters, concelho: e.target.value });
+            }}
             className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 px-3 text-sm text-slate-700 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-100 cursor-pointer"
           >
             <option value="Todos">Todos os Concelhos</option>
@@ -75,6 +163,38 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </div>
         </div>
       </div>
+
+      {(detectedLocation || locationError) && (
+        <div className="mt-3 flex items-center justify-between text-xs">
+          {detectedLocation ? (
+            <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 w-full px-3 py-2 rounded-xl shadow-2xs">
+              <MapPin className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <span>
+                A filtrar imóveis na tua zona: <strong>{detectedLocation}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={handleClearDetectedLocation}
+                className="ml-auto inline-flex items-center gap-1 text-[11px] text-emerald-700 hover:text-emerald-900 font-semibold cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+                <span>Limpar</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-amber-800 bg-amber-50/90 border border-amber-200/80 w-full px-3 py-2 rounded-xl">
+              <span>{locationError}</span>
+              <button
+                type="button"
+                onClick={() => setLocationError(null)}
+                className="ml-auto text-amber-700 hover:text-amber-900 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
         <div className="flex flex-wrap items-center gap-1.5">
