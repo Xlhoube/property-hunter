@@ -116,11 +116,11 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 transition-colors">
-        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 transition-colors flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 p-4 sm:p-5 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-emerald-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-emerald-600 shrink-0">
               <Bell className="h-4 w-4 text-amber-300 dark:text-amber-200" />
             </div>
             <div>
@@ -128,7 +128,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 Criar Alerta de Oportunidades
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Recebe novos imóveis e descidas de preço em tempo real
+                Recebe novos imóveis e descidas em tempo real
               </p>
             </div>
           </div>
@@ -140,18 +140,19 @@ export const AlertModal: React.FC<AlertModalProps> = ({
           </button>
         </div>
 
-        {isSuccess ? (
-          <div className="my-8 flex flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-3">
-              <Check className="h-6 w-6" />
+        <div className="p-4 sm:p-5 overflow-y-auto">
+          {isSuccess ? (
+            <div className="my-8 flex flex-col items-center justify-center text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-3">
+                <Check className="h-6 w-6" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900 dark:text-white">Alerta Criado com Sucesso!</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
+                Vais receber notificações automáticas para as oportunidades de {concelho}.
+              </p>
             </div>
-            <h4 className="text-base font-bold text-slate-900 dark:text-white">Alerta Criado com Sucesso!</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
-              Vais receber notificações automáticas para as oportunidades de {concelho}.
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Concelho de Interesse
@@ -414,6 +415,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             </div>
           </form>
         )}
+        </div>
       </div>
     </div>
   );

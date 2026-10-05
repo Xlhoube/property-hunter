@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.7.0
+- **Versão Actual:** v0.8.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -19,8 +19,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 ## Stack Escolhida e Justificação
 - **Frontend & Backend (Fullstack):** Next.js 16 (App Router) + React 19 + TypeScript
   - *Justificação:* Renderização rápida, rotas de API nativas para webhooks/crons e ecossistema moderno.
-- **Design System & Estilos:** Tailwind CSS + Lucide Icons + Dark Mode Nativo
-  - *Justificação:* Design limpo, muito espaço em branco (*whitespace*), tipografia legível e paleta funcional com tema claro e escuro (slate-950, slate-900, slate-800 e esmeralda escuro).
+- **Design System & Estilos:** Tailwind CSS + Lucide Icons + Dark Mode Nativo + Mobile-First Design
+  - *Justificação:* Design limpo, muito espaço em branco (*whitespace*), tipografia legível e paleta funcional com tema claro e escuro (slate-950, slate-900, slate-800 e esmeralda escuro). Otimizado para smartphones e ecrãs tácteis com áreas de toque confortáveis (≥38px/42px).
 - **Base de Dados & Backend as a Service (BaaS):** Appwrite com fallback resiliente em memória
   - *Colecções implementadas:*
     - `properties`: Dados dos imóveis (título, preço, área, €/m², tipologia, condição, freguesia, concelho, link original inviolável, data de recolha).
@@ -49,10 +49,12 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-011 (2026-10-05):** Implementação de Geolocalização Nativa com Reverse Geocoding Híbrido. Adicionado à barra de filtros o botão "A minha localização" que aciona a API de Geolocation do browser (`navigator.geolocation.getCurrentPosition`). A latitude e longitude são resolvidas no servidor através de `/api/geocode/reverse` usando Nominatim OpenStreetMap (com timeout de 3.5s) e com recurso a fallback matemático determinístico (matriz de distâncias Haversine sobre os 25 concelhos de referência de Portugal).
 - **ADR-012 (2026-10-05):** Implementação de Procura por Raio Geográfico e Ordenação por Proximidade. Ao ativar a localização, a aplicação apresenta seletores rápidos de raio (5 km, 10 km, 25 km, 50 km, 100 km ou Todo o País) que filtram os imóveis em tempo real com base na fórmula de Haversine (`src/lib/geo.ts`). Os cartões de imóveis passam a exibir a distância exata em km (ex.: "a 7.1 km"), é adicionada a opção de ordenação "Mais Próximos de Mim", e a distância é incluída nos dossiês CSV exportados.
 - **ADR-013 (2026-10-05):** Implementação de Modo Escuro Integral com Suporte a Tailwind CSS v4 e Zero FOUC. Criado `ThemeProvider` com contexto React e hook `useTheme()`, sincronização em `localStorage` (`property_hunter_theme`) e leitura das preferências de sistema (`prefers-color-scheme`). Configurada a directiva `@custom-variant dark (&:where(.dark, .dark *));` no Tailwind v4 para propagação da classe `.dark` no elemento raiz `<html>`, com script síncrono no `<head>` de `layout.tsx` para eliminar flashes brancos. Adaptados integralmente todos os componentes (Navbar, MarketStatBanner, FilterBar, PropertyCard, modais e rodapé) com paleta Slate escuro (`dark:bg-slate-950`, `dark:bg-slate-900`, `dark:border-slate-800`).
+- **ADR-014 (2026-10-05):** Otimização Mobile-First e Menu Responsivo para Smartphones. Redesenhada a barra de navegação (`Navbar.tsx`) com gaveta móvel expansível via botão hambúrguer (`Menu`/`X`), integrando os atalhos de ronda nos portais, configuração de alertas e estado da última ronda em botões táteis largos (touch targets ≥40px). Otimizado o `MarketStatBanner.tsx` com disposição 2x2 sem cortes de texto, a `FilterBar.tsx` com grelha móvel em 2 colunas para seletores e carrosséis horizontais táteis (`no-scrollbar`) para raios e tipologias. Modais adaptados com altura máxima segura (`max-h-[92vh]`), cabeçalho e rodapé fixos e scroll interno suave.
 
 ---
 
-## O que já funciona (v0.7.0)
+## O que já funciona (v0.8.0)
+- **Otimização Mobile-First Integral:** Barra de navegação com menu hambúrguer responsivo para telemóveis, banners de métricas 2x2 perfeitamente enquadrados, filtros táteis com scroll horizontal nativo e modais com rolagem suave que não quebram em ecrãs estreitos (320px a 420px).
 - **Modo Escuro (Dark Mode):** Alternador no cabeçalho com transição suave, persistência no navegador, deteção do sistema operativo e paleta Slate premium adaptada em todos os ecrãs e modais.
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
