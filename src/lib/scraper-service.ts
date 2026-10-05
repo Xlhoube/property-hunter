@@ -1,6 +1,7 @@
 import { Property } from '@/types/property';
 import { calculatePriceM2, calculatePriceDeviation, determineOpportunityRating, determinePriceChange } from '@/lib/market-analysis';
-import { addOrUpdatePropertyInMemory, fetchProperties } from '@/lib/appwrite';
+import { addOrUpdatePropertyInMemory, fetchProperties, fetchActiveAlerts } from '@/lib/appwrite';
+import { dispatchPropertyNotification } from '@/lib/notification-service';
 
 export interface ScraperResult {
   timestamp: string;
@@ -8,18 +9,22 @@ export interface ScraperResult {
   new_properties: number;
   updated_prices: number;
   price_drops: number;
+  notifications_sent: number;
   details: string[];
 }
+
 
 export async function runHourlyScraper(): Promise<ScraperResult> {
   console.log('[Property Hunter] Iniciando ronda horária de prospecção nos portais...');
   
   const currentProperties = await fetchProperties();
+  const activeAlerts = await fetchActiveAlerts();
   const timestamp = new Date().toISOString();
   
   let newCount = 0;
   let updatedCount = 0;
   let dropsCount = 0;
+  let notificationsSent = 0;
   const details: string[] = [];
 
   const candidateChanges = [
@@ -74,6 +79,22 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
       details.push(
         `Imóvel ${existing.title.slice(0, 30)}... baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
       );
+
+      // Disparar notificações para alertas que cubram este concelho
+      for (const alert of activeAlerts) {
+        if (!alert.concelho || alert.concelho === 'Todos' || alert.concelho.toLowerCase() === updatedProp.concelho.toLowerCase()) {
+          const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
+          if (destination) {
+            await dispatchPropertyNotification({
+              channel: alert.channel,
+              destination,
+              property: updatedProp,
+              alertReason: 'price_drop',
+            });
+            notificationsSent++;
+          }
+        }
+      }
     }
   }
 
@@ -110,6 +131,24 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
     addOrUpdatePropertyInMemory(newCandidate);
     newCount++;
     details.push(`Novo imóvel detectado: ${newCandidate.title} em ${newCandidate.concelho} por ${newCandidate.price}€`);
+
+    // Disparar notificações para novo imóvel se for bom negócio
+    for (const alert of activeAlerts) {
+      if (!alert.concelho || alert.concelho === 'Todos' || alert.concelho.toLowerCase() === newCandidate.concelho.toLowerCase()) {
+        if (!alert.only_good_deals || newCandidate.opportunity_rating === 'good') {
+          const destination = alert.channel === 'email' ? alert.user_email : alert.webhook_url;
+          if (destination) {
+            await dispatchPropertyNotification({
+              channel: alert.channel,
+              destination,
+              property: newCandidate,
+              alertReason: 'new_opportunity',
+            });
+            notificationsSent++;
+          }
+        }
+      }
+    }
   }
 
   return {
@@ -118,6 +157,7 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
     new_properties: newCount,
     updated_prices: updatedCount,
     price_drops: dropsCount,
+    notifications_sent: notificationsSent,
     details,
   };
 }

@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.1.0
+- **Versão Actual:** v0.2.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -28,7 +28,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `market_zones`: Tabela de referência de preço médio por metro quadrado por zona geográfica (Lisboa, Porto, Cascais, Braga, Coimbra, Faro).
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
 - **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via Vercel Cron Jobs (`0 * * * *` invocando `/api/cron/scrape`).
-- **Notificações:** Webhooks e modais interativos in-app para alertas em tempo real.
+- **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
 
 ---
 
@@ -36,21 +36,25 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-001 (2026-10-05):** Início do projecto com arquitectura Next.js (App Router) + Tailwind CSS + Appwrite para gestão NoSQL/relacional dos imóveis e Vercel Cron para automação horária.
 - **ADR-002 (2026-10-05):** Adopção de sistema de classificação visual de oportunidade em três níveis baseados no desvio percentual face à média da zona: Bom Preço (verde <-10%), Dentro do Preço (amarelo/neutro ±10%) e Mau Preço (vermelho/alerta >+10%).
 - **ADR-003 (2026-10-05):** Implementação de camada de persistência híbrida com fallback em memória. Permite execução imediata local com 10 imóveis realistas e 12 zonas de Portugal sem bloqueio de arranque antes da introdução das chaves Appwrite.
+- **ADR-004 (2026-10-05):** Validação de testes no ecrã e aprovação do ambiente local em http://localhost:3005 pelo utilizador, confirmando o carregamento dos cartões de imóveis, histórico de preços e filtros interactivos.
+- **ADR-005 (2026-10-05):** Implementação do despachante universal de notificações multicanal (Telegram Bot API e Discord Webhooks) integrado no motor de prospecção e no modal de subscrição de alertas com botão de teste imediato.
 
 ---
 
-## O que já funciona (v0.1.0)
+## O que já funciona (v0.2.0)
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
 - Modal de histórico de preços com linha temporal e variações registadas.
-- Modal de configuração de alertas (concelho, orçamento máximo, tipologia, canal de envio).
-- Execução manual e agendada do serviço de prospecção horária (`/api/cron/scrape`).
+- Modal de configuração e teste de alertas com suporte a Telegram (Chat ID / Webhook), Discord (Webhook) e Email.
+- Botão "Testar Envio" no modal de alertas com diagnóstico e feedback instantâneo.
+- Execução manual e agendada do serviço de prospecção horária (`/api/cron/scrape`) com disparo automático de alertas para utilizadores subscritos.
+- Rota de teste dedicada `/api/alerts/test` com modo de simulação e suporte a credenciais reais.
 - Ambiente de testes local validado e funcional em `http://localhost:3005`.
 
 ---
 
 ## Próximos Passos
-1. Conectar a instância da consola Appwrite inserindo as variáveis no ficheiro `.env.local`.
-2. Adicionar scrapers reais por portal imobiliário (Idealista, Imovirtual, CasaSAPO) com respeito pelas políticas de robots.txt.
-3. Ligar disparos reais de webhook para Telegram Bot ou Discord Webhook.
+1. Inserir chaves reais no `.env.local` (`TELEGRAM_BOT_TOKEN`, `APPWRITE_API_KEY`).
+2. Adicionar scrapers reais por portal imobiliário (Idealista, Imovirtual, CasaSAPO) com respeito pelas políticas de robots.txt e normalização de dados.
+3. Exportação de listagens e dossiês de oportunidade para formato CSV / PDF para apresentação a investidores.

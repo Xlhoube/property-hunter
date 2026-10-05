@@ -158,6 +158,23 @@ export async function createAlert(alertData: Omit<UserAlert, 'id' | 'created_at'
   return newAlert;
 }
 
+export async function fetchActiveAlerts(): Promise<UserAlert[]> {
+  try {
+    if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID !== 'property-hunter') {
+      const response = await databases.listDocuments(DATABASE_ID, COLL_USER_ALERTS, [
+        Query.equal('is_active', true),
+        Query.limit(100),
+      ]);
+      if (response && response.documents && response.documents.length > 0) {
+        return response.documents as unknown as UserAlert[];
+      }
+    }
+  } catch (err) {
+    console.warn('Appwrite fetchActiveAlerts fallback:', err);
+  }
+  return memoryAlerts.filter((a) => a.is_active);
+}
+
 export function addOrUpdatePropertyInMemory(property: Property): Property {
   const idx = memoryProperties.findIndex((p) => p.source_id === property.source_id || p.id === property.id);
   if (idx >= 0) {
@@ -169,3 +186,4 @@ export function addOrUpdatePropertyInMemory(property: Property): Property {
 }
 
 export { client, databases };
+
