@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.6.0
+- **Versão Actual:** v0.7.0
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -19,8 +19,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 ## Stack Escolhida e Justificação
 - **Frontend & Backend (Fullstack):** Next.js 16 (App Router) + React 19 + TypeScript
   - *Justificação:* Renderização rápida, rotas de API nativas para webhooks/crons e ecossistema moderno.
-- **Design System & Estilos:** Tailwind CSS + Lucide Icons
-  - *Justificação:* Design limpo, muito espaço em branco (*whitespace*), tipografia legível e paleta funcional (neutros com destaques em verde/vermelho estritamente para métricas financeiras).
+- **Design System & Estilos:** Tailwind CSS + Lucide Icons + Dark Mode Nativo
+  - *Justificação:* Design limpo, muito espaço em branco (*whitespace*), tipografia legível e paleta funcional com tema claro e escuro (slate-950, slate-900, slate-800 e esmeralda escuro).
 - **Base de Dados & Backend as a Service (BaaS):** Appwrite com fallback resiliente em memória
   - *Colecções implementadas:*
     - `properties`: Dados dos imóveis (título, preço, área, €/m², tipologia, condição, freguesia, concelho, link original inviolável, data de recolha).
@@ -48,10 +48,12 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-010 (2026-10-05):** Ajuste da cadência de recolha automática para um intervalo de 12 horas (`cron: '0 8,20 * * *'`, executando às 08:00 e às 20:00 UTC) no GitHub Actions e indicação na interface. Esta medida protege o crawler contra bloqueios de IP/WAF por pedidos excessivos aos portais imobiliários, mantendo duas atualizações diárias abrangentes (manhã e noite) e a faculdade de disparo manual a qualquer momento.
 - **ADR-011 (2026-10-05):** Implementação de Geolocalização Nativa com Reverse Geocoding Híbrido. Adicionado à barra de filtros o botão "A minha localização" que aciona a API de Geolocation do browser (`navigator.geolocation.getCurrentPosition`). A latitude e longitude são resolvidas no servidor através de `/api/geocode/reverse` usando Nominatim OpenStreetMap (com timeout de 3.5s) e com recurso a fallback matemático determinístico (matriz de distâncias Haversine sobre os 25 concelhos de referência de Portugal).
 - **ADR-012 (2026-10-05):** Implementação de Procura por Raio Geográfico e Ordenação por Proximidade. Ao ativar a localização, a aplicação apresenta seletores rápidos de raio (5 km, 10 km, 25 km, 50 km, 100 km ou Todo o País) que filtram os imóveis em tempo real com base na fórmula de Haversine (`src/lib/geo.ts`). Os cartões de imóveis passam a exibir a distância exata em km (ex.: "a 7.1 km"), é adicionada a opção de ordenação "Mais Próximos de Mim", e a distância é incluída nos dossiês CSV exportados.
+- **ADR-013 (2026-10-05):** Implementação de Modo Escuro Integral com Suporte a Tailwind CSS v4 e Zero FOUC. Criado `ThemeProvider` com contexto React e hook `useTheme()`, sincronização em `localStorage` (`property_hunter_theme`) e leitura das preferências de sistema (`prefers-color-scheme`). Configurada a directiva `@custom-variant dark (&:where(.dark, .dark *));` no Tailwind v4 para propagação da classe `.dark` no elemento raiz `<html>`, com script síncrono no `<head>` de `layout.tsx` para eliminar flashes brancos. Adaptados integralmente todos os componentes (Navbar, MarketStatBanner, FilterBar, PropertyCard, modais e rodapé) com paleta Slate escuro (`dark:bg-slate-950`, `dark:bg-slate-900`, `dark:border-slate-800`).
 
 ---
 
-## O que já funciona (v0.6.0)
+## O que já funciona (v0.7.0)
+- **Modo Escuro (Dark Mode):** Alternador no cabeçalho com transição suave, persistência no navegador, deteção do sistema operativo e paleta Slate premium adaptada em todos os ecrãs e modais.
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).

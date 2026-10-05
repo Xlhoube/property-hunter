@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --background: #f8fafc;
@@ -8,6 +10,18 @@
     --card-foreground: #0f172a;
     --border: #e2e8f0;
   }
+
+  .dark {
+    --background: #020617;
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --card-foreground: #f8fafc;
+    --border: #1e293b;
+  }
+}
+
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body {

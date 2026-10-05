@@ -18,47 +18,47 @@ export const MarketStatBanner: React.FC<MarketStatBannerProps> = ({ properties }
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 my-6">
-      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:bg-slate-900 dark:border-slate-800 transition-colors">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-500">Monitorizados</span>
-          <Building2 className="h-4 w-4 text-slate-400" />
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Monitorizados</span>
+          <Building2 className="h-4 w-4 text-slate-400 dark:text-slate-500" />
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight text-slate-900">{total}</span>
-          <span className="text-xs text-slate-500">imóveis ativos</span>
+          <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{total}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">imóveis ativos</span>
         </div>
       </div>
 
-      <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-4 shadow-xs">
+      <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-4 shadow-xs dark:bg-emerald-950/30 dark:border-emerald-800/60 transition-colors">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-emerald-800">Bom Preço (€/m²)</span>
-          <Flame className="h-4 w-4 text-emerald-600" />
+          <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Bom Preço (€/m²)</span>
+          <Flame className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight text-emerald-900">{goodDeals}</span>
-          <span className="text-xs font-medium text-emerald-700">&gt;10% abaixo da zona</span>
+          <span className="text-2xl font-bold tracking-tight text-emerald-900 dark:text-emerald-100">{goodDeals}</span>
+          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">&gt;10% abaixo da zona</span>
         </div>
       </div>
 
-      <div className="rounded-xl border border-emerald-200/80 bg-white p-4 shadow-xs">
+      <div className="rounded-xl border border-emerald-200/80 bg-white p-4 shadow-xs dark:bg-slate-900 dark:border-slate-800 transition-colors">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-600">Baixas de Preço</span>
-          <TrendingDown className="h-4 w-4 text-emerald-600" />
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Baixas de Preço</span>
+          <TrendingDown className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight text-slate-900">{priceDrops}</span>
-          <span className="text-xs font-medium text-emerald-600">com desconto ativo</span>
+          <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{priceDrops}</span>
+          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">com desconto ativo</span>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
+      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs dark:bg-slate-900 dark:border-slate-800 transition-colors">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-500">Média Amostra</span>
-          <CheckCircle2 className="h-4 w-4 text-slate-400" />
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Média Amostra</span>
+          <CheckCircle2 className="h-4 w-4 text-slate-400 dark:text-slate-500" />
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight text-slate-900">{avgM2.toLocaleString('pt-PT')}€</span>
-          <span className="text-xs text-slate-500">por m²</span>
+          <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{avgM2.toLocaleString('pt-PT')}€</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">por m²</span>
         </div>
       </div>
     </div>

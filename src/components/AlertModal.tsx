@@ -116,25 +116,25 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 transition-colors">
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white">
-              <Bell className="h-4 w-4 text-amber-300" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white dark:bg-emerald-600">
+              <Bell className="h-4 w-4 text-amber-300 dark:text-amber-200" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Criar Alerta de Oportunidades
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Recebe novos imóveis e descidas de preço em tempo real
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -142,24 +142,24 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
         {isSuccess ? (
           <div className="my-8 flex flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mb-3">
               <Check className="h-6 w-6" />
             </div>
-            <h4 className="text-base font-bold text-slate-900">Alerta Criado com Sucesso!</h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-xs">
+            <h4 className="text-base font-bold text-slate-900 dark:text-white">Alerta Criado com Sucesso!</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
               Vais receber notificações automáticas para as oportunidades de {concelho}.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Concelho de Interesse
               </label>
               <select
                 value={concelho}
                 onChange={(e) => setConcelho(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200 cursor-pointer"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800 cursor-pointer transition-colors"
               >
                 {availableConcelhos.map((c) => (
                   <option key={c} value={c}>
@@ -170,7 +170,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Canal de Notificação
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -184,7 +184,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     channel === 'discord'
                       ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span>Discord</span>
@@ -200,7 +200,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     channel === 'telegram'
                       ? 'border-sky-500 bg-sky-500 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span>Telegram</span>
@@ -215,8 +215,8 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   }}
                   className={`rounded-xl py-2 px-3 text-center font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     channel === 'email'
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-xs dark:border-emerald-600 dark:bg-emerald-600'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span>Email</span>
@@ -228,13 +228,13 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             {channel === 'discord' && (
               <div className="space-y-3">
                 {!showAdvancedWebhook ? (
-                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 text-slate-700 space-y-2.5">
-                    <div className="flex items-center gap-2 text-indigo-900 font-bold">
-                      <Users className="h-4 w-4 text-indigo-600" />
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 dark:border-indigo-900/60 dark:bg-indigo-950/40 p-3.5 text-slate-700 dark:text-slate-300 space-y-2.5 transition-colors">
+                    <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-bold">
+                      <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                       <span>Comunidade Discord Property Hunter</span>
                     </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
-                      Não precisas de configurar nada! Entra no servidor oficial e recebe alertas organizados em canais automáticos por concelho (<code className="text-indigo-700 font-semibold bg-white/70 px-1 py-0.5 rounded">#{concelho.toLowerCase()}</code>).
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                      Não precisas de configurar nada! Entra no servidor oficial e recebe alertas organizados em canais automáticos por concelho (<code className="text-indigo-700 dark:text-indigo-300 font-semibold bg-white/70 dark:bg-slate-800 px-1 py-0.5 rounded">#{concelho.toLowerCase()}</code>).
                     </p>
                     <a
                       href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/"}
@@ -250,7 +250,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowAdvancedWebhook(true)}
-                        className="text-[11px] text-slate-500 hover:text-indigo-600 underline cursor-pointer inline-flex items-center gap-1"
+                        className="text-[11px] text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 underline cursor-pointer inline-flex items-center gap-1"
                       >
                         <SlidersHorizontal className="h-3 w-3" />
                         <span>Sou administrador e quero ligar o meu próprio canal (Webhook)</span>
@@ -258,15 +258,15 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/60 p-3 transition-colors">
                     <div className="flex items-center justify-between">
-                      <label className="block font-semibold text-slate-800">
+                      <label className="block font-semibold text-slate-800 dark:text-slate-200">
                         URL do teu Webhook Discord
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowAdvancedWebhook(false)}
-                        className="text-[11px] text-indigo-600 hover:underline cursor-pointer"
+                        className="text-[11px] text-indigo-600 hover:underline cursor-pointer dark:text-indigo-400"
                       >
                         Voltar ao modo simples
                       </button>
@@ -276,14 +276,14 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                       placeholder="https://discord.com/api/webhooks/..."
                       value={contact}
                       onChange={(e) => setContact(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-300"
+                      className="w-full rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-300 transition-colors"
                     />
                     <div className="flex justify-end pt-1">
                       <button
                         type="button"
                         onClick={handleTestNotification}
                         disabled={isTesting || !contact.trim()}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 disabled:opacity-40 cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 disabled:opacity-40 cursor-pointer"
                       >
                         {isTesting ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
                         <span>Testar Webhook</span>
@@ -296,24 +296,24 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
             {/* SELEÇÃO DO CANAL: TELEGRAM */}
             {channel === 'telegram' && (
-              <div className="rounded-xl border border-sky-100 bg-sky-50/60 p-3.5 space-y-2.5">
+              <div className="rounded-xl border border-sky-100 bg-sky-50/60 dark:border-sky-900/60 dark:bg-sky-950/40 p-3.5 space-y-2.5 transition-colors">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sky-900 font-bold">
-                    <ShieldCheck className="h-4 w-4 text-sky-600" />
+                  <div className="flex items-center gap-2 text-sky-900 dark:text-sky-300 font-bold">
+                    <ShieldCheck className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                     <span>Alertas no Telemóvel (Telegram)</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleTestNotification}
                     disabled={isTesting || !contact.trim()}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 hover:text-sky-800 disabled:opacity-40 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-700 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200 disabled:opacity-40 cursor-pointer"
                   >
                     {isTesting ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
                     <span>Testar</span>
                   </button>
                 </div>
 
-                <p className="text-[11px] text-slate-600 leading-relaxed">
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                   Para começares a receber, abre o bot no Telegram e clica em <b>Iniciar</b>. A seguir, indica o teu Chat ID ou contacto:
                 </p>
 
@@ -336,10 +336,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                       setContact(e.target.value);
                       setTestResult(null);
                     }}
-                    className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-300"
+                    className="w-full rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-2 px-3 text-xs text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-300 transition-colors"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   💡 Podes descobrir o teu Chat ID enviando /start para o bot <code>@userinfobot</code>.
                 </p>
               </div>
@@ -348,7 +348,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
             {/* SELEÇÃO DO CANAL: EMAIL */}
             {channel === 'email' && (
               <div className="space-y-1.5">
-                <label className="block font-semibold text-slate-700">
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">
                   O teu Endereço de Email
                 </label>
                 <input
@@ -357,9 +357,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   placeholder="exemplo@email.com"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 py-2.5 px-3 text-xs text-slate-800 placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-hidden focus:ring-2 focus:ring-slate-200 transition-colors"
                 />
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Recebe relatórios consolidados sempre que surgirem descidas de preço em {concelho}.
                 </p>
               </div>
@@ -369,20 +369,20 @@ export const AlertModal: React.FC<AlertModalProps> = ({
               <div
                 className={`flex items-start gap-2 rounded-xl p-2.5 text-[11px] ${
                   testResult.success
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-800'
+                    : 'bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-800'
                 }`}
               >
                 {testResult.success ? (
-                  <Check className="h-3.5 w-3.5 mt-0.5 text-emerald-600 shrink-0" />
+                  <Check className="h-3.5 w-3.5 mt-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 ) : (
-                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 text-rose-600 shrink-0" />
+                  <AlertCircle className="h-3.5 w-3.5 mt-0.5 text-rose-600 dark:text-rose-400 shrink-0" />
                 )}
                 <span>{testResult.message}</span>
               </div>
             )}
 
-            <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 border border-slate-100">
+            <div className="flex items-center gap-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 border border-slate-100 dark:border-slate-700 transition-colors">
               <input
                 type="checkbox"
                 id="goodDealsOnly"
@@ -390,7 +390,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 onChange={(e) => setOnlyGoodDeals(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
               />
-              <label htmlFor="goodDealsOnly" className="cursor-pointer text-slate-700 font-medium select-none">
+              <label htmlFor="goodDealsOnly" className="cursor-pointer text-slate-700 dark:text-slate-300 font-medium select-none">
                 Apenas notificar &quot;Bom Preço&quot; (&gt;10% abaixo da média de m²)
               </label>
             </div>
@@ -399,14 +399,14 @@ export const AlertModal: React.FC<AlertModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>{isSubmitting ? 'A guardar...' : 'Activar Alerta'}</span>
