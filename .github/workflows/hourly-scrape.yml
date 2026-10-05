@@ -1,9 +1,9 @@
-name: Prospecção Imobiliária Horária (Property Hunter)
+name: Prospecção Imobiliária a Cada 12h (Property Hunter)
 
 on:
   schedule:
-    # Executa automaticamente a cada hora (ao minuto 0)
-    - cron: '0 * * * *'
+    # Executa automaticamente de 12 em 12 horas (às 08:00 e 20:00 UTC) para evitar bloqueios
+    - cron: '0 8,20 * * *'
   workflow_dispatch: # Permite disparo manual com 1 clique no separador Actions do GitHub
 
 jobs:

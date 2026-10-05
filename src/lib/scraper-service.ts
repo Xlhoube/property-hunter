@@ -15,7 +15,7 @@ export interface ScraperResult {
 }
 
 export async function runHourlyScraper(): Promise<ScraperResult> {
-  console.log('[Property Hunter] Iniciando ronda horária de prospecção real nos portais (Imovirtual, CasaSAPO, Idealista)...');
+  console.log('[Property Hunter] Iniciando ronda de prospecção periódica (intervalo: 12h) nos portais (Imovirtual, CasaSAPO, Idealista)...');
 
   const currentProperties = await fetchProperties();
   const activeAlerts = await fetchActiveAlerts();

@@ -48,11 +48,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={onTriggerScrape}
             disabled={isScraping}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-60 cursor-pointer"
-            title="Executar prospecção horária imediatamente"
+            title="Executar prospeção nos portais imediatamente (intervalo programado: 12h)"
           >
             <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${isScraping ? 'animate-spin text-emerald-600' : ''}`} />
             <span className="hidden sm:inline">
-              {isScraping ? 'A recolher...' : 'Ronda Horária'}
+              {isScraping ? 'A recolher...' : 'Executar Ronda'}
             </span>
           </button>
 

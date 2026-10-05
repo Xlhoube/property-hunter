@@ -146,7 +146,7 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
         {/* Rodapé */}
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4 bg-slate-50/50">
           <span className="text-[11px] text-slate-400">
-            Rondas automáticas programadas de hora a hora via Vercel Cron.
+            Rondas automáticas programadas de 12 em 12 horas (08:00 e 20:00) para evitar bloqueios.
           </span>
           <div className="flex items-center gap-2">
             {!isRunning && (

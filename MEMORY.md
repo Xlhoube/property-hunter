@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.4.0
+- **Versão Actual:** v0.4.1
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -27,7 +27,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
     - `price_history`: Registo histórico temporal de alterações de preço por imóvel.
     - `market_zones`: Tabela de referência de preço médio por metro quadrado por zona geográfica (Lisboa, Porto, Cascais, Braga, Coimbra, Faro).
     - `user_alerts`: Critérios de pesquisa de utilizadores para disparo de alertas (email, telegram, discord).
-- **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions e Vercel Cron Jobs (`0 * * * *` e `0 8 * * *`).
+- **Motor de Prospecção & Ingestão:** Módulos Node.js acionados via GitHub Actions a cada 12 horas (`0 8,20 * * *`) e Vercel Cron diária (`0 8 * * *`).
 - **Scrapers Nativos:** Imovirtual (extracção estruturada `__NEXT_DATA__`), CasaSAPO (HTML parsing resiliente com cheerio) e Idealista (suporte a gateway anti-bloqueio).
 - **Exportação & Relatórios:** Utilitário nativo de exportação de dossiê de investimentos em formato CSV compatível com Excel europeu (delimitador `;` e codificação UTF-8 BOM).
 - **Notificações:** Despachante universal multicanal com suporte a Telegram Bot API e Discord Webhook com mensagens ricas, fotos e botões de clique rápido.
@@ -44,10 +44,11 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-007 (2026-10-05):** Resolução da limitação de agendamentos no plano gratuito da Vercel (Hobby). O ficheiro `vercel.json` foi ajustado para execução diária (`0 8 * * *`), e foi criado o workflow `.github/workflows/hourly-scrape.yml` no GitHub Actions para garantir prospecção horária autónoma (`0 * * * *`) e disparos manuais sob demanda sem qualquer custo adicional.
 - **ADR-008 (2026-10-05):** Implementação da suite de crawlers reais para os portais imobiliários portugueses em `src/lib/scrapers/` (Imovirtual com extracção estruturada via `__NEXT_DATA__`, CasaSAPO com parsing de cards e características com `cheerio`, e Idealista com suporte a proxy anti-bloqueio). Integração no serviço horário com deduplicação, cálculo automático de €/m² e disparo de alertas.
 - **ADR-009 (2026-10-05):** Implementação do Modal de Prospeção em Tempo Real (`ScrapeProgressModal`) e Exportação de Dossiê Imobiliário CSV (`exportPropertiesToCSV`). O utilizador pode agora acionar a varredura sob demanda a partir da navbar com acompanhamento em direto dos 3 portais (novos anúncios, baixas de preço e alertas), bem como descarregar a qualquer momento a lista filtrada de oportunidades formatada para Excel europeu com caracteres em Português de Portugal.
+- **ADR-010 (2026-10-05):** Ajuste da cadência de recolha automática para um intervalo de 12 horas (`cron: '0 8,20 * * *'`, executando às 08:00 e às 20:00 UTC) no GitHub Actions e indicação na interface. Esta medida protege o crawler contra bloqueios de IP/WAF por pedidos excessivos aos portais imobiliários, mantendo duas atualizações diárias abrangentes (manhã e noite) e a faculdade de disparo manual a qualquer momento.
 
 ---
 
-## O que já funciona (v0.4.0)
+## O que já funciona (v0.4.1)
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
 - Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
