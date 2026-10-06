@@ -85,7 +85,12 @@ export async function scrapeImovirtual(concelho = 'lisboa', maxItems = 20): Prom
         ? slug
         : `https://www.imovirtual.com/pt/anuncio/${slug}`;
 
-      const cover_image = item.images?.large || item.images?.medium || item.images?.small || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800';
+      let cover_image = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800';
+      if (Array.isArray(item.images) && item.images.length > 0) {
+        cover_image = item.images[0].large || item.images[0].medium || item.images[0].small || cover_image;
+      } else if (item.images && !Array.isArray(item.images)) {
+        cover_image = (item.images as any).large || (item.images as any).medium || (item.images as any).small || cover_image;
+      }
 
       results.push({
         source_portal: 'Imovirtual',
