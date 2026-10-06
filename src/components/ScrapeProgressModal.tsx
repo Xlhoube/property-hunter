@@ -158,7 +158,7 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
               onClick={onClose}
               className="rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
             >
-              Fechar
+              OK
             </button>
           </div>
         </div>
