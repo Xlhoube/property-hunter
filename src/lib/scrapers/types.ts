@@ -1,7 +1,7 @@
 import { PropertyTypology, PropertyCondition } from '@/types/property';
 
 export interface ScrapedRawProperty {
-  source_portal: 'Idealista' | 'Imovirtual' | 'CasaSAPO';
+  source_portal: 'Idealista' | 'Imovirtual' | 'CasaSAPO' | string;
   source_id: string;
   title: string;
   price: number;

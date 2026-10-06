@@ -3,6 +3,7 @@ import { ScrapedRawProperty } from './types';
 import { scrapeImovirtual } from './imovirtual';
 import { scrapeCasaSapo } from './casasapo';
 import { scrapeIdealista } from './idealista';
+import { scrapeGenericSource } from './generic';
 import {
   calculatePriceM2,
   calculatePriceDeviation,
@@ -10,6 +11,7 @@ import {
   findZoneAveragePriceM2,
 } from '@/lib/market-analysis';
 import { fetchMarketZones } from '@/lib/appwrite';
+import { getActiveSources } from '@/lib/source-service';
 
 export interface MultiPortalScrapeReport {
   timestamp: string;
@@ -28,41 +30,45 @@ export async function scrapeAllPortals(
 ): Promise<MultiPortalScrapeReport> {
   const timestamp = new Date().toISOString();
   const zones = await fetchMarketZones();
+  const activeSources = await getActiveSources();
 
-  let imovirtualCount = 0;
-  let casasapoCount = 0;
-  let idealistaCount = 0;
+  const sourceCounts: Record<string, number> = {};
   const rawList: ScrapedRawProperty[] = [];
   const errors: string[] = [];
 
   for (const concelho of concelhos) {
     console.log(`[MultiPortal Scraper] A iniciar ronda integrada para concelho: ${concelho}`);
 
-    const [imoRes, sapoRes, idlRes] = await Promise.allSettled([
-      scrapeImovirtual(concelho, maxItemsPerPortal),
-      scrapeCasaSapo(concelho, maxItemsPerPortal),
-      scrapeIdealista(concelho, maxItemsPerPortal),
-    ]);
+    const promises = activeSources.map(async (source) => {
+      try {
+        let results: ScrapedRawProperty[] = [];
+        if (source.slug === 'imovirtual') {
+          results = await scrapeImovirtual(concelho, maxItemsPerPortal);
+        } else if (source.slug === 'casasapo') {
+          results = await scrapeCasaSapo(concelho, maxItemsPerPortal);
+        } else if (source.slug === 'idealista') {
+          results = await scrapeIdealista(concelho, maxItemsPerPortal);
+        } else {
+          results = await scrapeGenericSource(source, concelho, maxItemsPerPortal);
+        }
+        return { source, results };
+      } catch (err) {
+        throw { source, err };
+      }
+    });
 
-    if (imoRes.status === 'fulfilled' && imoRes.value.length > 0) {
-      imovirtualCount += imoRes.value.length;
-      rawList.push(...imoRes.value);
-    } else if (imoRes.status === 'rejected') {
-      errors.push(`Imovirtual (${concelho}): ${String(imoRes.reason)}`);
-    }
-
-    if (sapoRes.status === 'fulfilled' && sapoRes.value.length > 0) {
-      casasapoCount += sapoRes.value.length;
-      rawList.push(...sapoRes.value);
-    } else if (sapoRes.status === 'rejected') {
-      errors.push(`CasaSAPO (${concelho}): ${String(sapoRes.reason)}`);
-    }
-
-    if (idlRes.status === 'fulfilled' && idlRes.value.length > 0) {
-      idealistaCount += idlRes.value.length;
-      rawList.push(...idlRes.value);
-    } else if (idlRes.status === 'rejected') {
-      errors.push(`Idealista (${concelho}): ${String(idlRes.reason)}`);
+    const settled = await Promise.allSettled(promises);
+    for (const res of settled) {
+      if (res.status === 'fulfilled') {
+         const { source, results } = res.value;
+         if (results.length > 0) {
+            sourceCounts[source.slug] = (sourceCounts[source.slug] || 0) + results.length;
+            rawList.push(...results);
+         }
+      } else {
+         const { source, err } = res.reason;
+         errors.push(`${source.name} (${concelho}): ${String(err)}`);
+      }
     }
   }
 
@@ -121,16 +127,18 @@ export async function scrapeAllPortals(
   }
 
   console.log(
-    `[MultiPortal Scraper] Ronda concluída: ${normalizedProperties.length} imóveis únicos processados (Imovirtual: ${imovirtualCount}, CasaSAPO: ${casasapoCount}, Idealista: ${idealistaCount}).`
+    `[MultiPortal Scraper] Ronda concluída: ${normalizedProperties.length} imóveis únicos processados (${Object.entries(sourceCounts)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ')}).`
   );
 
   return {
     timestamp,
     concelhos_scanned: concelhos,
     total_raw_found: rawList.length,
-    imovirtual_count: imovirtualCount,
-    casasapo_count: casasapoCount,
-    idealista_count: idealistaCount,
+    imovirtual_count: sourceCounts['imovirtual'] || 0,
+    casasapo_count: sourceCounts['casasapo'] || 0,
+    idealista_count: sourceCounts['idealista'] || 0,
     normalized_properties: normalizedProperties,
     errors,
   };

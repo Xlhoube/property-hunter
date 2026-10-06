@@ -17,7 +17,7 @@ export interface PriceHistoryRecord {
 export interface Property {
   id: string;
   source_id: string;
-  source_portal: "Idealista" | "Imovirtual" | "CustoJusto" | "CasaSAPO" | "Outro";
+  source_portal: "Idealista" | "Imovirtual" | "CustoJusto" | "CasaSAPO" | "Outro" | string;
   original_url: string; // Link inviolável para o portal de origem
   title: string;
   description: string;

@@ -73,7 +73,7 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
                   <Sparkles className="h-3 w-3 mr-1.5" /> A contactar motores e APIs ativas...
                 </span>
                 <p className="text-[10px] text-slate-400 mt-2 max-w-xs text-center">
-                  Nota: Apenas os portais com motores de extração nativos desenvolvidos serão lidos durante esta versão do protótipo.
+                  Nota: Todas as fontes ativas configuradas em "/fontes" serão processadas (incluindo fontes personalizadas).
                 </p>
               </div>
             </div>
