@@ -26,7 +26,7 @@ export default function HomePage() {
   const [selectedHistoryProperty, setSelectedHistoryProperty] = useState<Property | null>(null);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
 
-  const [filters, setFilters] = useState<PropertyFilterParams>({
+  const [filters, setFiltersState] = useState<PropertyFilterParams>({
     searchQuery: '',
     concelho: 'Todos',
     opportunity: 'Todas',
@@ -34,6 +34,25 @@ export default function HomePage() {
     priceChangeOnly: false,
     sortBy: 'newest',
   });
+
+  const setFilters = (newFilters: PropertyFilterParams | ((prev: PropertyFilterParams) => PropertyFilterParams)) => {
+    setFiltersState((prev) => {
+      const next = typeof newFilters === 'function' ? newFilters(prev) : newFilters;
+      try {
+        localStorage.setItem('ph_filters', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('ph_filters');
+      if (stored) {
+        setFiltersState(JSON.parse(stored));
+      }
+    } catch (e) {}
+  }, []);
 
   const loadProperties = async (currentFilters: PropertyFilterParams) => {
     setIsLoading(true);
