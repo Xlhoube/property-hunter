@@ -1,5 +1,6 @@
 import { Client, Databases, Query, ID } from 'node-appwrite';
-import { Property } from '@/types/property';
+import { Property, PropertyFilterParams } from '@/types/property';
+import { filterAndAttachDistance } from '@/lib/geo';
 
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || 'property-hunter';
@@ -44,11 +45,13 @@ export async function addOrUpdatePropertyServer(property: Property): Promise<Pro
   return property;
 }
 
-export async function fetchPropertiesServer(filters?: any): Promise<any[]> {
+export async function fetchPropertiesServer(filters?: PropertyFilterParams): Promise<Property[]> {
+  let result: Property[] = [];
   try {
     if (projectId && projectId !== 'property-hunter' && apiKey) {
       const queries: any[] = [Query.limit(100), Query.orderDesc('last_scraped_at')];
 
+      // Filtros exatos que a Cloud suporta via Queries
       if (filters?.concelho && filters.concelho !== 'Todos') {
         queries.push(Query.equal('concelho', filters.concelho));
       }
@@ -61,11 +64,86 @@ export async function fetchPropertiesServer(filters?: any): Promise<any[]> {
 
       const response = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, queries);
       if (response) {
-        return response.documents as any[];
+        result = response.documents as unknown as Property[];
       }
     }
   } catch (err) {
     console.warn('Erro ao ler propriedades na Appwrite (Server):', err);
   }
-  return [];
+
+  // Filtragem local (Textual, Arrays, Preços e Áreas) que não puderam ser enviados via Appwrite Query
+  if (filters?.searchQuery) {
+    const q = filters.searchQuery.toLowerCase().trim();
+    result = result.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.freguesia.toLowerCase().includes(q) ||
+        p.concelho.toLowerCase().includes(q) ||
+        p.district.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+    );
+  }
+
+  if (filters?.typologies && filters.typologies.length > 0) {
+    result = result.filter((p) => filters.typologies!.includes(p.typology));
+  }
+
+  if (filters?.priceChangeOnly) {
+    result = result.filter((p) => p.price_change_type === 'drop');
+  }
+
+  if (filters?.minPrice) {
+    result = result.filter((p) => p.price >= filters.minPrice!);
+  }
+
+  if (filters?.maxPrice) {
+    result = result.filter((p) => p.price <= filters.maxPrice!);
+  }
+
+  if (filters?.minArea) {
+    result = result.filter((p) => p.area_m2 >= filters.minArea!);
+  }
+
+  if (filters?.maxArea) {
+    result = result.filter((p) => p.area_m2 <= filters.maxArea!);
+  }
+
+  if (filters?.maxPriceM2) {
+    result = result.filter((p) => p.price_m2 <= filters.maxPriceM2!);
+  }
+
+  // Filtragem e enriquecimento por raio de distância geográfica
+  if (filters?.userLocation && typeof filters.userLocation.lat === 'number' && typeof filters.userLocation.lng === 'number') {
+    result = filterAndAttachDistance(
+      result,
+      filters.userLocation.lat,
+      filters.userLocation.lng,
+      filters.radiusKm
+    );
+  }
+
+  // Ordenação final
+  switch (filters?.sortBy) {
+    case 'distance_asc':
+      result.sort((a, b) => (a.distance_km ?? 999999) - (b.distance_km ?? 999999));
+      break;
+    case 'opportunity_best':
+      result.sort((a, b) => a.price_deviation_pct - b.price_deviation_pct);
+      break;
+    case 'price_asc':
+      result.sort((a, b) => a.price - b.price);
+      break;
+    case 'price_desc':
+      result.sort((a, b) => b.price - a.price);
+      break;
+    case 'price_m2_asc':
+      result.sort((a, b) => a.price_m2 - b.price_m2);
+      break;
+    case 'newest':
+    default:
+      result.sort((a, b) => new Date(b.last_scraped_at).getTime() - new Date(a.last_scraped_at).getTime());
+      break;
+  }
+
+  return result;
 }

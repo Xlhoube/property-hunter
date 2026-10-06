@@ -64,10 +64,12 @@ export default function HomePage() {
 
     try {
       const targetConcelho = filters.concelho !== 'Todos' ? filters.concelho : undefined;
+      const scrapePayload = { ...filters, concelho: targetConcelho };
+      
       const res = await fetch('/api/cron/scrape', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ concelho: targetConcelho })
+        body: JSON.stringify(scrapePayload)
       });
       const json = await res.json();
 

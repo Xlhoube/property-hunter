@@ -11,20 +11,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Nao autorizado' }, { status: 401 });
     }
   }
-  let targetConcelho: string | undefined = undefined;
+  let scrapePayload: any = undefined;
   
   if (request.method === 'POST') {
     try {
       const body = await request.json();
-      if (body && body.concelho) targetConcelho = body.concelho;
+      if (body) scrapePayload = body;
     } catch (e) {}
   } else {
     const { searchParams } = new URL(request.url);
-    targetConcelho = searchParams.get('concelho') || undefined;
+    const concelho = searchParams.get('concelho');
+    if (concelho) scrapePayload = { concelho };
   }
 
   try {
-    const result = await runHourlyScraper(targetConcelho);
+    const result = await runHourlyScraper(scrapePayload);
     return NextResponse.json({
       success: true,
       message: 'Prospeccao horaria concluida com sucesso.',

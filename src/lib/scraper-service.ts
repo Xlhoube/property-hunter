@@ -15,7 +15,8 @@ export interface ScraperResult {
   details: string[];
 }
 
-export async function runHourlyScraper(targetConcelho?: string): Promise<ScraperResult> {
+export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
+  const targetConcelho = filters?.concelho;
   console.log(`[Property Hunter] Iniciando ronda de prospecção nos portais. Alvo: ${targetConcelho || 'Default'}`);
 
   const currentProperties = await fetchPropertiesServer();
@@ -29,11 +30,32 @@ export async function runHourlyScraper(targetConcelho?: string): Promise<Scraper
   const details: string[] = [];
 
   try {
-    const concelhosToScrape = targetConcelho ? [targetConcelho] : ['Lisboa', 'Porto', 'Cascais', 'Braga'];
+    const concelhosToScrape = targetConcelho && targetConcelho !== 'Todos' ? [targetConcelho] : ['Lisboa', 'Porto', 'Cascais', 'Braga'];
     const portalReport = await scrapeAllPortals(concelhosToScrape, 15);
-    console.log(`[Scraper Service] Crawlers concluídos: ${portalReport.normalized_properties.length} imóveis recolhidos.`);
+    
+    // Filtro JS para evitar sobrecarga da DB com imóveis que o utilizador não quer
+    let validProperties = portalReport.normalized_properties;
+    if (filters) {
+      if (filters.typologies && filters.typologies.length > 0) {
+        validProperties = validProperties.filter(p => filters.typologies.includes(p.typology));
+      }
+      if (filters.minPrice && filters.minPrice > 0) {
+        validProperties = validProperties.filter(p => p.price >= filters.minPrice);
+      }
+      if (filters.maxPrice && filters.maxPrice > 0) {
+        validProperties = validProperties.filter(p => p.price <= filters.maxPrice);
+      }
+      if (filters.minArea && filters.minArea > 0) {
+        validProperties = validProperties.filter(p => p.area_m2 >= filters.minArea);
+      }
+      if (filters.maxArea && filters.maxArea > 0) {
+        validProperties = validProperties.filter(p => p.area_m2 <= filters.maxArea);
+      }
+    }
+    
+    console.log(`[Scraper Service] Crawlers concluídos: ${portalReport.normalized_properties.length} recolhidos. ${validProperties.length} correspondem aos filtros.`);
 
-    for (const scraped of portalReport.normalized_properties) {
+    for (const scraped of validProperties) {
       const existing = currentProperties.find(
         (p) => p.source_id === scraped.source_id || p.original_url === scraped.original_url
       );
