@@ -57,7 +57,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
   
 - **ADR-019 (2026-10-06):** Inclusão da Tipologia Bi-Familiar. Adicionada a tipologia "Bi-Familiar" à listagem principal de `PropertyTypology`, filtros da interface e lógica de extração textual nos scrapers.
 - **ADR-020 (2026-10-06):** Correção do Motor de Escrita Cloud. O `scraper-service` foi atualizado para guardar os novos imóveis e descidas de preço diretamente na Appwrite. Implementado módulo `server-appwrite.ts` que utiliza o SDK Node e a `APPWRITE_API_KEY` para superar as restrições de permissões "create" num ambiente serverless, resolvendo o bug onde os resultados da prospecção apenas atualizavam a memória temporal e o utilizador ficava restrito a ver 10 itens seccionados da Cloud.
-  
+- **ADR-021 (2026-10-06):** Correção do Motor de Leitura Cloud (Frontend Proxy). A interface do utilizador não conseguia ver as listagens de imóveis após a prospeção devido à falta de permissões públicas (Guest) na Appwrite. A função `fetchProperties` chamada pelo lado cliente foi refatorada para fazer um pedido POST à rota `/api/properties`, que por sua vez utiliza o SDK Server com `API_KEY` para ultrapassar as restrições e apresentar os resultados fidedignos em tempo-real na UI.
+
 ---
 
 ## O que já funciona (v0.9.1)
