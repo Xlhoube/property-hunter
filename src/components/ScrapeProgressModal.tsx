@@ -43,7 +43,7 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
                   : 'Prospecção em Tempo Real Concluída'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Varredura ativa em Imovirtual, CasaSAPO e Idealista
+                A executar rotinas de pesquisa configuradas...
               </p>
             </div>
           </div>
@@ -68,16 +68,13 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
                   A extrair tipologias, cálculo de preço por metro quadrado e confronto com as médias de cada freguesia...
                 </p>
               </div>
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800/60">
-                  Imovirtual (Ativo)
+              <div className="flex flex-col items-center justify-center gap-2 pt-2">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60">
+                  <Sparkles className="h-3 w-3 mr-1.5" /> A contactar motores e APIs ativas...
                 </span>
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-cyan-100 text-cyan-800 border border-cyan-200 dark:bg-cyan-950/50 dark:text-cyan-300 dark:border-cyan-800/60">
-                  CasaSAPO (Ativo)
-                </span>
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-lime-100 text-lime-800 border border-lime-200 dark:bg-lime-950/50 dark:text-lime-300 dark:border-lime-800/60">
-                  Idealista (Ativo)
-                </span>
+                <p className="text-[10px] text-slate-400 mt-2 max-w-xs text-center">
+                  Nota: Apenas os portais com motores de extração nativos desenvolvidos serão lidos durante esta versão do protótipo.
+                </p>
               </div>
             </div>
           ) : error ? (
