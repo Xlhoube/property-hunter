@@ -63,7 +63,12 @@ export default function HomePage() {
     setScrapeError(null);
 
     try {
-      const res = await fetch('/api/cron/scrape', { method: 'POST' });
+      const targetConcelho = filters.concelho !== 'Todos' ? filters.concelho : undefined;
+      const res = await fetch('/api/cron/scrape', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ concelho: targetConcelho })
+      });
       const json = await res.json();
 
       if (res.ok && json.success) {

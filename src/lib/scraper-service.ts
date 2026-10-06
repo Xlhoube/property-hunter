@@ -15,8 +15,8 @@ export interface ScraperResult {
   details: string[];
 }
 
-export async function runHourlyScraper(): Promise<ScraperResult> {
-  console.log('[Property Hunter] Iniciando ronda de prospecção periódica (intervalo: 12h) nos portais (Imovirtual, CasaSAPO, Idealista)...');
+export async function runHourlyScraper(targetConcelho?: string): Promise<ScraperResult> {
+  console.log(`[Property Hunter] Iniciando ronda de prospecção nos portais. Alvo: ${targetConcelho || 'Default'}`);
 
   const currentProperties = await fetchPropertiesServer();
   const activeAlerts = await fetchActiveAlerts();
@@ -29,7 +29,8 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
   const details: string[] = [];
 
   try {
-    const portalReport = await scrapeAllPortals(['Lisboa', 'Porto', 'Cascais', 'Braga'], 15);
+    const concelhosToScrape = targetConcelho ? [targetConcelho] : ['Lisboa', 'Porto', 'Cascais', 'Braga'];
+    const portalReport = await scrapeAllPortals(concelhosToScrape, 15);
     console.log(`[Scraper Service] Crawlers concluídos: ${portalReport.normalized_properties.length} imóveis recolhidos.`);
 
     for (const scraped of portalReport.normalized_properties) {
