@@ -69,12 +69,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           const detected = data.success && data.concelho ? data.concelho : 'A tua localização';
           setDetectedLocation(detected);
 
-          // Ao ativar geolocalização, definir userLocation, raio padrão de 25 km e ordenar por proximidade
+          // Ao ativar geolocalização, definir userLocation e o concelho detetado
           onChange({
             ...filters,
             userLocation: { lat, lng },
             radiusKm: filters.radiusKm !== undefined ? filters.radiusKm : 25,
-            concelho: 'Todos',
+            concelho: data.success && data.concelho ? data.concelho : 'Todos',
             searchQuery: '',
             sortBy: 'distance_asc',
           });

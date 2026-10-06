@@ -99,6 +99,27 @@ export default function FontesPage() {
     }
   };
 
+  const handleToggleAll = async (targetState: boolean) => {
+    // Atualização otimista
+    setSources((prev) =>
+      prev.map((s) => ({ ...s, enabled: targetState, status: targetState ? 'active' : 'paused' }))
+    );
+
+    try {
+      const promises = sources.map((source) =>
+        fetch('/api/sources', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: source.id, enabled: targetState }),
+        })
+      );
+      await Promise.allSettled(promises);
+      fetchSources();
+    } catch {
+      fetchSources();
+    }
+  };
+
   // Testar ligação do portal em direto
   const handleTestConnection = async (source: PropertySource) => {
     setTestingId(source.id);
@@ -409,7 +430,9 @@ export default function FontesPage() {
           </div>
         </div>
 
-        {/* Barra de Filtro Rápido por Categoria de Mercado */}
+        {/* Ações em Lote e Categoria */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Barra de Filtro Rápido por Categoria de Mercado */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0 mr-1">
             Categoria:
@@ -437,6 +460,24 @@ export default function FontesPage() {
               {SOURCE_CATEGORY_LABELS[cat]}
             </button>
           ))}
+        </div>
+          
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleToggleAll(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span>Ativar Todas</span>
+          </button>
+          <button
+            onClick={() => handleToggleAll(false)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1.5 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
+          >
+            <XCircle className="h-3.5 w-3.5" />
+            <span>Desativar Todas</span>
+          </button>
+        </div>
         </div>
 
         {/* Lista de Cartões de Fontes */}
