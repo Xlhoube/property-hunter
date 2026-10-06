@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ArrowUpDown, TrendingDown, Download, LocateFixed, MapPin, X, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Search, ArrowUpDown, TrendingDown, Download, LocateFixed, MapPin, X, SlidersHorizontal, ChevronDown, RefreshCw } from 'lucide-react';
 import { PropertyFilterParams, PropertyTypology } from '@/types/property';
 
 interface FilterBarProps {
