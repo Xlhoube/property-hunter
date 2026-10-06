@@ -9,7 +9,7 @@ const client = new Client();
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || 'property-hunter';
 
-if (typeof window !== 'undefined' && projectId && projectId !== 'property-hunter') {
+if (projectId && projectId !== 'property-hunter') {
   client.setEndpoint(endpoint).setProject(projectId);
 }
 

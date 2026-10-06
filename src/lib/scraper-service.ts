@@ -1,6 +1,7 @@
 import { Property } from '@/types/property';
 import { determinePriceChange } from '@/lib/market-analysis';
-import { addOrUpdatePropertyInMemory, fetchProperties, fetchActiveAlerts } from '@/lib/appwrite';
+import { fetchProperties, fetchActiveAlerts, addOrUpdatePropertyInMemory } from '@/lib/appwrite';
+import { addOrUpdatePropertyServer } from '@/lib/server-appwrite';
 import { dispatchPropertyNotification } from '@/lib/notification-service';
 import { scrapeAllPortals } from './scrapers';
 
@@ -67,6 +68,7 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
           };
 
           addOrUpdatePropertyInMemory(updatedProp);
+          await addOrUpdatePropertyServer(updatedProp);
           updatedCount++;
           if (changeStats.type === 'drop') dropsCount++;
 
@@ -97,6 +99,7 @@ export async function runHourlyScraper(): Promise<ScraperResult> {
       } else {
         // Novo imóvel detectado no portal
         addOrUpdatePropertyInMemory(scraped);
+        await addOrUpdatePropertyServer(scraped);
         newCount++;
 
         if (scraped.opportunity_rating === 'good') {
