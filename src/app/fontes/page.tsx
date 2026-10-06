@@ -58,7 +58,19 @@ export default function FontesPage() {
       const res = await fetch('/api/sources');
       const data = await res.json();
       if (data.success && Array.isArray(data.sources)) {
-        setSources(data.sources);
+        let savedPrefs: Record<string, boolean> = {};
+        try {
+          const stored = localStorage.getItem('ph_source_prefs');
+          if (stored) savedPrefs = JSON.parse(stored);
+        } catch (e) {}
+
+        const mergedSources = data.sources.map((s: PropertySource) => {
+          if (savedPrefs[s.id] !== undefined) {
+            return { ...s, enabled: savedPrefs[s.id], status: savedPrefs[s.id] ? 'active' : 'paused' };
+          }
+          return s;
+        });
+        setSources(mergedSources);
       }
     } catch (err) {
       console.error('Erro ao carregar fontes:', err);
@@ -84,6 +96,13 @@ export default function FontesPage() {
     );
 
     try {
+      const stored = localStorage.getItem('ph_source_prefs');
+      const prefs = stored ? JSON.parse(stored) : {};
+      prefs[source.id] = updatedState;
+      localStorage.setItem('ph_source_prefs', JSON.stringify(prefs));
+    } catch (e) {}
+
+    try {
       const res = await fetch('/api/sources', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -104,6 +123,15 @@ export default function FontesPage() {
     setSources((prev) =>
       prev.map((s) => ({ ...s, enabled: targetState, status: targetState ? 'active' : 'paused' }))
     );
+
+    try {
+      const stored = localStorage.getItem('ph_source_prefs');
+      const prefs = stored ? JSON.parse(stored) : {};
+      sources.forEach((s) => {
+        prefs[s.id] = targetState;
+      });
+      localStorage.setItem('ph_source_prefs', JSON.stringify(prefs));
+    } catch (e) {}
 
     try {
       const promises = sources.map((source) =>
