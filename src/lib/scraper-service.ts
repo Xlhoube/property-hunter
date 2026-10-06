@@ -93,11 +93,20 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
           addOrUpdatePropertyInMemory(updatedProp);
           await addOrUpdatePropertyServer(updatedProp);
           updatedCount++;
-          if (changeStats.type === 'drop') dropsCount++;
-
-          details.push(
-            `[Baixa de Preço] ${updatedProp.title.slice(0, 35)}... em ${updatedProp.concelho} baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
-          );
+          if (changeStats.type === 'drop') {
+            dropsCount++;
+            details.push(
+              `[Baixa de Preço] ${updatedProp.title.slice(0, 35)}... baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
+            );
+          } else if (changeStats.type === 'increase') {
+            details.push(
+              `[Subida de Preço] ${updatedProp.title.slice(0, 35)}... subiu de ${prevPrice}€ para ${newPrice}€ (+${changeStats.pct}%)`
+            );
+          } else {
+            details.push(
+              `[Preço Alterado] ${updatedProp.title.slice(0, 35)}... alterou de ${prevPrice}€ para ${newPrice}€`
+            );
+          }
 
           // Disparar notificações para alertas subscritos
           for (const alert of activeAlerts) {
