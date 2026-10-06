@@ -10,7 +10,7 @@ interface FilterBarProps {
   totalCount?: number;
 }
 
-const TYPOLOGIES: PropertyTypology[] = ['T0', 'T1', 'T2', 'T3', 'T4+', 'Moradia'];
+const TYPOLOGIES: PropertyTypology[] = ['T0', 'T1', 'T2', 'T3', 'T4+', 'Moradia', 'Bi-Familiar'];
 
 const RADIUS_OPTIONS: { label: string; value: number | null }[] = [
   { label: '5 km', value: 5 },

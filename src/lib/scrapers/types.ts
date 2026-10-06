@@ -30,8 +30,10 @@ export function getRandomUserAgent(): string {
 export function extractTypology(text: string): PropertyTypology {
   const match = text.match(/\bT([0-9])(?:\+([0-9]))?\b/i);
   if (!match) {
-    if (text.toLowerCase().includes('moradia')) return 'Moradia';
-    if (text.toLowerCase().includes('terreno')) return 'Terreno';
+    const textLower = text.toLowerCase();
+    if (textLower.includes('bi-familiar') || textLower.includes('bifamiliar') || textLower.includes('bi familiar')) return 'Bi-Familiar';
+    if (textLower.includes('moradia')) return 'Moradia';
+    if (textLower.includes('terreno')) return 'Terreno';
     return 'T2';
   }
   const num = parseInt(match[1], 10);

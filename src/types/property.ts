@@ -1,4 +1,4 @@
-export type PropertyTypology = "T0" | "T1" | "T2" | "T3" | "T4+" | "Moradia" | "Terreno";
+export type PropertyTypology = "T0" | "T1" | "T2" | "T3" | "T4+" | "Moradia" | "Bi-Familiar" | "Terreno";
 
 export type PropertyCondition = "Novo" | "Usado" | "Para Recuperar" | "Em Construção";
 

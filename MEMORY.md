@@ -55,6 +55,8 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-017 (2026-10-06):** Filtros Avançados por Intervalo de Preço e Área Útil. Integrado painel expansível na `FilterBar` com campos numéricos para Preço Mínimo (€), Preço Máximo (€), Área Mínima (m²) e Área Máxima (m²), com botão de acção rápida para limpeza de intervalos e feedback reactivo na listagem de imóveis.
 - **ADR-018 (2026-10-06):** Motor de Prospecção Dinâmico para Fontes Arbitrárias. A rotina `scrapeAllPortals` foi refatorizada para não estar limitada aos 3 portais nativos (Imovirtual, Idealista, CasaSAPO). Passou a consultar dinamicamente todas as fontes activas configuradas pelo utilizador em `/fontes`. Para fontes sem scraper estruturado, foi implementado um `scrapeGenericSource` com extração baseada no link e simulação de dados compatível com o protótipo.
   
+- **ADR-019 (2026-10-06):** Inclusão da Tipologia Bi-Familiar. Adicionada a tipologia "Bi-Familiar" à listagem principal de `PropertyTypology`, filtros da interface e lógica de extração textual nos scrapers.
+  
 ---
 
 ## O que já funciona (v0.9.1)
@@ -66,7 +68,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **Modo Escuro (Dark Mode):** Alternador no cabeçalho com transição suave, persistência no navegador, deteção do sistema operativo e paleta Slate premium adaptada em todos os ecrãs e modais.
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
 - Cartões de imóveis com leitura visual instantânea (*at a glance*): preço, preço/m², desvio face à média da freguesia, diferença face ao preço inicial e botão directo para o portal original.
-- Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
+- Barra de filtros reactiva: pesquisa por texto, concelho, tipologia (T0 a T4+, Moradia, Bi-Familiar, Terreno), apenas descidas de preço e ordenações (mais recente, maior desconto, menor preço/m²).
 - **Procura por Raio Geográfico:** Seleção de raio (5 km a 100 km) em redor da localização do utilizador, permitindo encontrar oportunidades em concelhos limítrofes.
 - **Ordenação por Proximidade:** Opção "📍 Mais Próximos de Mim" e indicação visual de distância em km em cada cartão de imóvel.
 - **Geolocalização "Obter a minha localização":** Deteção imediata da zona do utilizador com botão dedicado no campo de pesquisa e reverse geocoding híbrido.
