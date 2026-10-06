@@ -98,7 +98,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
             details.push(
               `[Baixa de Preço] ${updatedProp.title.slice(0, 35)}... baixou de ${prevPrice}€ para ${newPrice}€ (-${changeStats.pct}%)`
             );
-          } else if (changeStats.type === 'increase') {
+          } else if (changeStats.type === 'rise') {
             details.push(
               `[Subida de Preço] ${updatedProp.title.slice(0, 35)}... subiu de ${prevPrice}€ para ${newPrice}€ (+${changeStats.pct}%)`
             );
