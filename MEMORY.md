@@ -56,6 +56,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-018 (2026-10-06):** Motor de Prospecção Dinâmico para Fontes Arbitrárias. A rotina `scrapeAllPortals` foi refatorizada para não estar limitada aos 3 portais nativos (Imovirtual, Idealista, CasaSAPO). Passou a consultar dinamicamente todas as fontes activas configuradas pelo utilizador em `/fontes`. Para fontes sem scraper estruturado, foi implementado um `scrapeGenericSource` com extração baseada no link e simulação de dados compatível com o protótipo.
   
 - **ADR-019 (2026-10-06):** Inclusão da Tipologia Bi-Familiar. Adicionada a tipologia "Bi-Familiar" à listagem principal de `PropertyTypology`, filtros da interface e lógica de extração textual nos scrapers.
+- **ADR-020 (2026-10-06):** Correção do Motor de Escrita Cloud. O `scraper-service` foi atualizado para guardar os novos imóveis e descidas de preço diretamente na Appwrite. Implementado módulo `server-appwrite.ts` que utiliza o SDK Node e a `APPWRITE_API_KEY` para superar as restrições de permissões "create" num ambiente serverless, resolvendo o bug onde os resultados da prospecção apenas atualizavam a memória temporal e o utilizador ficava restrito a ver 10 itens seccionados da Cloud.
   
 ---
 
