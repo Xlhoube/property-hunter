@@ -23,6 +23,7 @@ import {
   Target,
   Database,
   Radio,
+  Info
 } from 'lucide-react';
 import { PropertySource, SourceType, SourceCategory, SOURCE_CATEGORY_LABELS } from '@/types/source';
 import { useTheme } from '@/components/ThemeProvider';
@@ -748,6 +749,25 @@ export default function FontesPage() {
                     <option value={6}>Cada 6 Horas</option>
                     <option value={24}>Cada 24 Horas (Diário)</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Explicação do Tipo de Fonte Selecionado */}
+              <div className="rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 p-3 flex gap-2.5 items-start">
+                <Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                <div className="text-[11.5px] leading-relaxed text-blue-700 dark:text-blue-300">
+                  {newType === 'html' && (
+                    <span><strong>Scraper HTML (Recomendado):</strong> Lê o código da página rapidamente para extrair dados visíveis. Ideal para a grande maioria dos portais e classificados comuns. É o método mais rápido e eficiente.</span>
+                  )}
+                  {newType === 'scraper' && (
+                    <span><strong>Crawler Estruturado:</strong> Simula um browser real. Essencial para sites protegidos contra bots, que carregam anúncios dinamicamente ou que precisam de interações complexas. Mais lento.</span>
+                  )}
+                  {newType === 'api' && (
+                    <span><strong>API REST / JSON:</strong> Conecta-se diretamente aos sistemas da fonte para extrair dados brutos e estruturados. É o método mais fiável, mas raro de encontrar aberto ao público.</span>
+                  )}
+                  {newType === 'rss' && (
+                    <span><strong>Feed RSS / XML:</strong> Lê canais de distribuição oficiais. Ótimo para saber imediatamente quando um novo anúncio é publicado, embora ofereça menos detalhes.</span>
+                  )}
                 </div>
               </div>
 

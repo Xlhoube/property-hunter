@@ -59,7 +59,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 ## O que já funciona (v0.9.1)
 - **Filtros Avançados por Intervalo:** Limites de Preço Mín/Máx (€) e Área Mín/Máx (m²) no painel expansível da `FilterBar` com filtragem reactiva instantânea.
 - **Categorias Estratégicas de Fontes:** 12 fontes categorizadas em Portais, Redes de Mediação, Classificados e Leilões Judiciais/Finanças, com abas de selecção rápida e etiquetas nos cartões.
-- **Gestão de Fontes de Pesquisa (`/fontes`):** Página dedicada para escolher portais ativos na ronda, alternadores instantâneos (*toggle switch*), teste de conectividade em tempo real e formulário para adicionar novas fontes personalizadas.
+- **Gestão de Fontes de Pesquisa (`/fontes`):** Página dedicada para escolher portais ativos na ronda, alternadores instantâneos (*toggle switch*), teste de conectividade em tempo real e formulário para adicionar novas fontes personalizadas com explicação detalhada dos tipos de integração (Scraper, Crawler, API, RSS).
 - **Otimização Mobile-First Integral:** Barra de navegação com menu hambúrguer responsivo para telemóveis, banners de métricas 2x2 perfeitamente enquadrados, filtros táteis com scroll horizontal nativo e modais com rolagem suave que não quebram em ecrãs estreitos (320px a 420px).
 - **Modo Escuro (Dark Mode):** Alternador no cabeçalho com transição suave, persistência no navegador, deteção do sistema operativo e paleta Slate premium adaptada em todos os ecrãs e modais.
 - Dashboard principal com métricas de prospecção agregadas (imóveis monitorizados, abaixo da média, baixas de preço, última ronda).
