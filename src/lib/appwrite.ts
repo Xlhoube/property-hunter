@@ -41,7 +41,7 @@ export async function fetchProperties(filters?: PropertyFilterParams): Promise<P
       }
 
       const response = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, queries);
-      if (response && response.documents && response.documents.length > 0) {
+      if (response) {
         return response.documents as unknown as Property[];
       }
     }
@@ -142,7 +142,7 @@ export async function fetchMarketZones(): Promise<MarketZone[]> {
   try {
     if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID !== 'property-hunter') {
       const response = await databases.listDocuments(DATABASE_ID, COLL_MARKET_ZONES, [Query.limit(100)]);
-      if (response && response.documents && response.documents.length > 0) {
+      if (response) {
         return response.documents as unknown as MarketZone[];
       }
     }
@@ -179,7 +179,7 @@ export async function fetchActiveAlerts(): Promise<UserAlert[]> {
         Query.equal('is_active', true),
         Query.limit(100),
       ]);
-      if (response && response.documents && response.documents.length > 0) {
+      if (response) {
         return response.documents as unknown as UserAlert[];
       }
     }
