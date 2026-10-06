@@ -36,7 +36,7 @@ export async function addOrUpdatePropertyServer(property: Property): Promise<Pro
       if (existing && existing.documents.length > 0) {
         await databases.updateDocument(DATABASE_ID, COLL_PROPERTIES, existing.documents[0].$id, payload);
       } else {
-        await databases.createDocument(DATABASE_ID, COLL_PROPERTIES, property.id || ID.unique(), payload);
+        await databases.createDocument(DATABASE_ID, COLL_PROPERTIES, ID.unique(), payload);
       }
     }
   } catch (err) {

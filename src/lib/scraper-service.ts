@@ -1,9 +1,10 @@
 import { Property } from '@/types/property';
 import { determinePriceChange } from '@/lib/market-analysis';
-import { fetchActiveAlerts, addOrUpdatePropertyInMemory } from '@/lib/appwrite';
+import { fetchActiveAlerts } from '@/lib/appwrite';
 import { addOrUpdatePropertyServer, fetchPropertiesServer } from '@/lib/server-appwrite';
 import { dispatchPropertyNotification } from '@/lib/notification-service';
 import { scrapeAllPortals } from './scrapers';
+import { getConcelhosWithinRadius } from '@/lib/geo';
 
 export interface ScraperResult {
   timestamp: string;
@@ -30,7 +31,17 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
   const details: string[] = [];
 
   try {
-    const concelhosToScrape = targetConcelho && targetConcelho !== 'Todos' ? [targetConcelho] : ['Lisboa', 'Porto', 'Cascais', 'Braga'];
+    let concelhosToScrape = ['Lisboa', 'Porto', 'Cascais', 'Braga'];
+    
+    if (filters?.userLocation && filters?.radiusKm) {
+      const radiusConcelhos = getConcelhosWithinRadius(filters.userLocation.lat, filters.userLocation.lng, filters.radiusKm);
+      if (radiusConcelhos.length > 0) {
+        concelhosToScrape = radiusConcelhos;
+      }
+    } else if (targetConcelho && targetConcelho !== 'Todos') {
+      concelhosToScrape = [targetConcelho];
+    }
+    
     const portalReport = await scrapeAllPortals(concelhosToScrape, 15);
     
     // Filtro JS para evitar sobrecarga da DB com imóveis que o utilizador não quer

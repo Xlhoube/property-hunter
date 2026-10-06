@@ -58,6 +58,19 @@ export function calculateDistanceKm(
 }
 
 /**
+ * Retorna uma lista de concelhos (dos disponíveis em CONCELHO_COORDINATES) que estão dentro de um determinado raio.
+ */
+export function getConcelhosWithinRadius(lat: number, lng: number, radiusKm: number): string[] {
+  const result: string[] = [];
+  for (const [concelho, coords] of Object.entries(CONCELHO_COORDINATES)) {
+    if (calculateDistanceKm(lat, lng, coords.lat, coords.lng) <= radiusKm) {
+      result.push(concelho);
+    }
+  }
+  return result;
+}
+
+/**
  * Obtém as coordenadas mais precisas de um imóvel (coordenada direta ou coordenada central do concelho).
  */
 export function getPropertyCoordinates(property: Property): { lat: number; lng: number } | null {
