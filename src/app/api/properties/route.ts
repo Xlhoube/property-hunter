@@ -1,19 +1,14 @@
 import { NextResponse } from 'next/server';
-import { fetchProperties } from '@/lib/appwrite';
+import { fetchPropertiesServer } from '@/lib/server-appwrite';
 import { PropertyFilterParams } from '@/types/property';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function POST(request: Request) {
+  let filters: PropertyFilterParams = {};
+  try {
+    filters = await request.json();
+  } catch (err) {}
 
-  const filters: PropertyFilterParams = {
-    searchQuery: searchParams.get('q') || undefined,
-    concelho: searchParams.get('concelho') || undefined,
-    opportunity: (searchParams.get('opportunity') as any) || undefined,
-    priceChangeOnly: searchParams.get('priceChangeOnly') === 'true',
-    sortBy: (searchParams.get('sortBy') as any) || undefined,
-  };
-
-  const properties = await fetchProperties(filters);
+  const properties = await fetchPropertiesServer(filters);
 
   return NextResponse.json({
     success: true,

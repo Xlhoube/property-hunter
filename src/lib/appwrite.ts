@@ -27,26 +27,21 @@ let memoryAlerts: UserAlert[] = [];
 
 export async function fetchProperties(filters?: PropertyFilterParams): Promise<Property[]> {
   try {
-    if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID !== 'property-hunter') {
-      const queries: string[] = [Query.limit(100), Query.orderDesc('last_scraped_at')];
-
-      if (filters?.concelho && filters.concelho !== 'Todos') {
-        queries.push(Query.equal('concelho', filters.concelho));
-      }
-      if (filters?.condition && filters.condition !== 'Todas') {
-        queries.push(Query.equal('condition', filters.condition));
-      }
-      if (filters?.opportunity && filters.opportunity !== 'Todas') {
-        queries.push(Query.equal('opportunity_rating', filters.opportunity));
-      }
-
-      const response = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, queries);
-      if (response) {
-        return response.documents as unknown as Property[];
+    if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID !== 'property-hunter') {
+      const res = await fetch('/api/properties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters || {})
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.properties) {
+          return json.properties;
+        }
       }
     }
   } catch (err) {
-    console.warn('Appwrite nao disponivel. A recorrer ao motor local com dados reais:', err);
+    console.warn('API de propriedades nao disponivel. A recorrer ao motor local:', err);
   }
 
   let result = [...memoryProperties];

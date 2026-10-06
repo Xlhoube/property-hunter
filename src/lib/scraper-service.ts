@@ -1,7 +1,7 @@
 import { Property } from '@/types/property';
 import { determinePriceChange } from '@/lib/market-analysis';
-import { fetchProperties, fetchActiveAlerts, addOrUpdatePropertyInMemory } from '@/lib/appwrite';
-import { addOrUpdatePropertyServer } from '@/lib/server-appwrite';
+import { fetchActiveAlerts, addOrUpdatePropertyInMemory } from '@/lib/appwrite';
+import { addOrUpdatePropertyServer, fetchPropertiesServer } from '@/lib/server-appwrite';
 import { dispatchPropertyNotification } from '@/lib/notification-service';
 import { scrapeAllPortals } from './scrapers';
 
@@ -18,7 +18,7 @@ export interface ScraperResult {
 export async function runHourlyScraper(): Promise<ScraperResult> {
   console.log('[Property Hunter] Iniciando ronda de prospecção periódica (intervalo: 12h) nos portais (Imovirtual, CasaSAPO, Idealista)...');
 
-  const currentProperties = await fetchProperties();
+  const currentProperties = await fetchPropertiesServer();
   const activeAlerts = await fetchActiveAlerts();
   const timestamp = new Date().toISOString();
 
