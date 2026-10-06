@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ArrowUpDown, TrendingDown, Download, LocateFixed, MapPin, X } from 'lucide-react';
+import { Search, ArrowUpDown, TrendingDown, Download, LocateFixed, MapPin, X, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { PropertyFilterParams, PropertyTypology } from '@/types/property';
 
 interface FilterBarProps {
@@ -31,6 +31,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const [isLocating, setIsLocating] = useState(false);
   const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const handleTypologyToggle = (typ: PropertyTypology) => {
     const current = filters.typologies || [];
@@ -258,7 +259,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
       )}
 
-      {/* Filtros de Tipologia e Acções Rápidas */}
+      {/* Filtros Avançados Expansíveis (Preço e Área) */}
       <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-t border-slate-100 pt-3 sm:pt-4 dark:border-slate-800 transition-colors">
         {/* Tipologias com deslizamento horizontal suave no telemóvel */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0">
@@ -297,6 +298,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <span>Baixa de Preço</span>
           </button>
 
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+              showAdvancedFilters || Boolean(filters.minPrice || filters.maxPrice || filters.minArea || filters.maxArea)
+                ? 'bg-slate-900 text-white shadow-xs dark:bg-emerald-600 dark:text-white'
+                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+            }`}
+            title="Definir limites de preço e área útil"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <span>Filtros</span>
+            <ChevronDown className={`h-3 w-3 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+          </button>
+
           <select
             value={filters.opportunity || 'Todas'}
             onChange={(e) => onChange({ ...filters, opportunity: e.target.value as any })}
@@ -320,6 +336,112 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           )}
         </div>
       </div>
+
+      {/* Painel Expansível de Intervalos Numéricos (Preço e Área) */}
+      {showAdvancedFilters && (
+        <div className="mt-3.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4 dark:border-slate-800 dark:bg-slate-800/40 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Intervalos de Valor e Dimensão
+            </span>
+            {(filters.minPrice || filters.maxPrice || filters.minArea || filters.maxArea) && (
+              <button
+                type="button"
+                onClick={() =>
+                  onChange({
+                    ...filters,
+                    minPrice: undefined,
+                    maxPrice: undefined,
+                    minArea: undefined,
+                    maxArea: undefined,
+                  })
+                }
+                className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer self-start sm:self-auto"
+              >
+                Limpar intervalos
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+            {/* Preço Mínimo */}
+            <div>
+              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                Preço Mínimo (€)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 150 000"
+                value={filters.minPrice ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...filters,
+                    minPrice: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+                className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+              />
+            </div>
+
+            {/* Preço Máximo */}
+            <div>
+              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                Preço Máximo (€)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 350 000"
+                value={filters.maxPrice ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...filters,
+                    maxPrice: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+                className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+              />
+            </div>
+
+            {/* Área Mínima */}
+            <div>
+              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                Área Mínima (m²)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 70"
+                value={filters.minArea ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...filters,
+                    minArea: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+                className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+              />
+            </div>
+
+            {/* Área Máxima */}
+            <div>
+              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                Área Máxima (m²)
+              </label>
+              <input
+                type="number"
+                placeholder="Ex: 200"
+                value={filters.maxArea ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...filters,
+                    maxArea: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
+                className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:outline-hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

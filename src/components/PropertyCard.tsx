@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ExternalLink, TrendingDown, TrendingUp, History, MapPin, Maximize2 } from 'lucide-react';
 import { Property } from '@/types/property';
 import { formatCurrency } from '@/lib/market-analysis';
+import { getSafePortalUrl } from '@/lib/portal-url';
 
 interface PropertyCardProps {
   property: Property;
@@ -19,6 +20,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const isBadDeal = property.opportunity_rating === 'bad';
   const hasPriceDrop = property.price_change_type === 'drop';
   const hasPriceRise = property.price_change_type === 'rise';
+
+  const portalUrl = getSafePortalUrl(property);
+
+  const handleOpenPortal = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+    if (portalUrl) {
+      window.open(portalUrl, '_blank', 'noopener,noreferrer');
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs transition-all hover:border-slate-300 hover:shadow-md dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700">
@@ -131,10 +142,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </button>
 
         <a
-          href={property.original_url}
+          href={portalUrl}
+          onClick={handleOpenPortal}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-3 sm:px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer min-h-[38px]"
+          title={`Abrir página do imóvel no ${property.source_portal}`}
         >
           <span>Ver no {property.source_portal}</span>
           <ExternalLink className="h-3.5 w-3.5 text-emerald-400 dark:text-emerald-200 shrink-0" />

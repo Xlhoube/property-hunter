@@ -4,6 +4,7 @@ import React from 'react';
 import { X, History, Calendar, ExternalLink } from 'lucide-react';
 import { Property } from '@/types/property';
 import { formatCurrency } from '@/lib/market-analysis';
+import { getSafePortalUrl } from '@/lib/portal-url';
 
 interface PriceHistoryModalProps {
   property: Property | null;
@@ -17,6 +18,15 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({
   if (!property) return null;
 
   const history = property.price_history || [];
+  const portalUrl = getSafePortalUrl(property);
+
+  const handleOpenPortal = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+    if (portalUrl) {
+      window.open(portalUrl, '_blank', 'noopener,noreferrer');
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-3 sm:p-4">
@@ -106,10 +116,12 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({
 
         <div className="p-4 sm:p-5 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-800 shrink-0 transition-colors bg-slate-50/50 dark:bg-slate-900/50">
           <a
-            href={property.original_url}
+            href={portalUrl}
+            onClick={handleOpenPortal}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+            title={`Abrir página do anúncio no ${property.source_portal}`}
           >
             <span>Abrir anúncio oficial</span>
             <ExternalLink className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />

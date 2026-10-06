@@ -24,7 +24,7 @@ import {
   Database,
   Radio,
 } from 'lucide-react';
-import { PropertySource, SourceType } from '@/types/source';
+import { PropertySource, SourceType, SourceCategory, SOURCE_CATEGORY_LABELS } from '@/types/source';
 import { useTheme } from '@/components/ThemeProvider';
 
 export default function FontesPage() {
@@ -32,6 +32,7 @@ export default function FontesPage() {
   const [sources, setSources] = useState<PropertySource[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'active' | 'paused' | 'custom'>('all');
+  const [filterCategory, setFilterCategory] = useState<SourceCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Estados do Modal de Adicionar Fonte
@@ -216,12 +217,16 @@ export default function FontesPage() {
       if (!matchesSearch) return false;
 
       // Filtro de tipo
-      if (filterType === 'active') return s.enabled;
-      if (filterType === 'paused') return !s.enabled;
-      if (filterType === 'custom') return s.isCustom;
+      if (filterType === 'active' && !s.enabled) return false;
+      if (filterType === 'paused' && s.enabled) return false;
+      if (filterType === 'custom' && !s.isCustom) return false;
+
+      // Filtro por Categoria
+      if (filterCategory !== 'all' && s.category !== filterCategory) return false;
+
       return true;
     });
-  }, [sources, searchQuery, filterType]);
+  }, [sources, searchQuery, filterType, filterCategory]);
 
   const activeCount = sources.filter((s) => s.enabled).length;
   const customCount = sources.filter((s) => s.isCustom).length;
@@ -403,6 +408,36 @@ export default function FontesPage() {
           </div>
         </div>
 
+        {/* Barra de Filtro Rápido por Categoria de Mercado */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0 mr-1">
+            Categoria:
+          </span>
+          <button
+            onClick={() => setFilterCategory('all')}
+            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer shrink-0 ${
+              filterCategory === 'all'
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            Todas as Categorias
+          </button>
+          {(['portal', 'rede', 'classificados', 'dados'] as SourceCategory[]).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilterCategory(cat)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer shrink-0 ${
+                filterCategory === cat
+                  ? 'bg-emerald-600 text-white font-semibold shadow-2xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {SOURCE_CATEGORY_LABELS[cat]}
+            </button>
+          ))}
+        </div>
+
         {/* Lista de Cartões de Fontes */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
@@ -455,6 +490,11 @@ export default function FontesPage() {
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
                               {source.name}
                             </h3>
+                            {source.category && (
+                              <span className="rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 text-[9px] font-semibold border border-slate-200 dark:border-slate-700">
+                                {SOURCE_CATEGORY_LABELS[source.category]}
+                              </span>
+                            )}
                             {source.isCustom && (
                               <span className="rounded bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 text-[10px] font-semibold border border-purple-200/60 dark:border-purple-800/60">
                                 Personalizada

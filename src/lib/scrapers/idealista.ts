@@ -58,7 +58,10 @@ export async function scrapeIdealista(concelho = 'lisboa', maxItems = 20): Promi
       if (!price || price <= 1000) return;
 
       const link = $el.find('a.item-link').attr('href') || '';
-      const original_url = link.startsWith('http') ? link : `https://www.idealista.pt${link}`;
+      const safeConcelhoSlug = concelho.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
+      const original_url = link.startsWith('http')
+        ? link
+        : (link ? `https://www.idealista.pt${link}` : `https://www.idealista.pt/comprar-casas/${safeConcelhoSlug}/`);
 
       const img = $el.find('img').first().attr('data-ondemand-img') ||
                   $el.find('img').first().attr('src') || '';
