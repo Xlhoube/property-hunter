@@ -3,8 +3,11 @@ import { runHourlyScraper } from '@/lib/scraper-service';
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    if (process.env.NODE_ENV === 'production') {
+  
+  // Se existir um cabeçalho de autorização (como o enviado pelo Vercel Cron), validamos.
+  // Caso contrário, permitimos a execução manual (via botão da UI / POST) para não bloquear o utilizador.
+  if (process.env.CRON_SECRET && authHeader) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Nao autorizado' }, { status: 401 });
     }
   }
