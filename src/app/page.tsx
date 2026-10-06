@@ -117,6 +117,8 @@ export default function HomePage() {
             availableConcelhos={availableConcelhos}
             onExportCSV={handleExportCSV}
             totalCount={properties.length}
+            onTriggerScrape={handleTriggerScrape}
+            isScraping={isScraping}
           />
 
           {isLoading ? (

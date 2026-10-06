@@ -8,6 +8,8 @@ interface FilterBarProps {
   availableConcelhos: string[];
   onExportCSV?: () => void;
   totalCount?: number;
+  onTriggerScrape?: () => void;
+  isScraping?: boolean;
 }
 
 const TYPOLOGIES: PropertyTypology[] = ['T0', 'T1', 'T2', 'T3', 'T4+', 'Moradia', 'Bi-Familiar'];
@@ -27,6 +29,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   availableConcelhos,
   onExportCSV,
   totalCount,
+  onTriggerScrape,
+  isScraping,
 }) => {
   const [isLocating, setIsLocating] = useState(false);
   const [detectedLocation, setDetectedLocation] = useState<string | null>(null);
@@ -119,37 +123,54 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       {/* Barra de Pesquisa e Seletores Principais */}
       <div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-12 md:gap-4">
         {/* Input de Pesquisa com Botão de Localização Integrado */}
-        <div className="relative md:col-span-6">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-          <input
-            type="text"
-            placeholder="Pesquisar freguesia, concelho..."
-            value={filters.searchQuery || ''}
-            onChange={(e) => {
-              onChange({ ...filters, searchQuery: e.target.value });
-            }}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-9 pr-28 sm:pr-40 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-100 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-700 transition-all"
-          />
+        <div className="md:col-span-6 flex gap-2">
+          {/* Input de Pesquisa com Botão de Localização Integrado */}
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              type="text"
+              placeholder="Pesquisar freguesia, concelho..."
+              value={filters.searchQuery || ''}
+              onChange={(e) => {
+                onChange({ ...filters, searchQuery: e.target.value });
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-9 pr-28 sm:pr-40 text-sm text-slate-800 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-slate-100 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-700 transition-all"
+            />
 
-          <button
-            type="button"
-            onClick={handleGetLocation}
-            disabled={isLocating}
-            className={`absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border px-2 sm:px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer disabled:opacity-60 ${
-              isLocationActive
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-800 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                : 'border-slate-200 bg-white text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-            }`}
-            title="Detetar a minha localização e pesquisar num raio"
-          >
-            <LocateFixed className={`h-3.5 w-3.5 ${isLocationActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'} ${isLocating ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">
-              {isLocating ? 'A localizar...' : isLocationActive ? 'Localização ativa' : 'A minha localização'}
-            </span>
-            <span className="sm:hidden font-medium">
-              {isLocating ? 'A obter...' : isLocationActive ? 'Ativo' : 'Perto'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={handleGetLocation}
+              disabled={isLocating}
+              className={`absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border px-2 sm:px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer disabled:opacity-60 ${
+                isLocationActive
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                  : 'border-slate-200 bg-white text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+              }`}
+              title="Detetar a minha localização e pesquisar num raio"
+            >
+              <LocateFixed className={`h-3.5 w-3.5 ${isLocationActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'} ${isLocating ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">
+                {isLocating ? 'A localizar...' : isLocationActive ? 'Localização ativa' : 'A minha localização'}
+              </span>
+              <span className="sm:hidden font-medium">
+                {isLocating ? 'A obter...' : isLocationActive ? 'Ativo' : 'Perto'}
+              </span>
+            </button>
+          </div>
+
+          {/* Botão Executar Ronda (Movido do Header) */}
+          {onTriggerScrape && (
+            <button
+              type="button"
+              onClick={onTriggerScrape}
+              disabled={isScraping}
+              className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-60 cursor-pointer"
+              title="Executar prospeção nos portais imediatamente"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-slate-500 dark:text-slate-400 ${isScraping ? 'animate-spin text-emerald-600' : ''}`} />
+              <span>{isScraping ? 'A recolher...' : 'Executar Ronda'}</span>
+            </button>
+          )}
         </div>
 
         {/* Seletores: em mobile ficam lado a lado em 2 colunas para poupar altura */}
