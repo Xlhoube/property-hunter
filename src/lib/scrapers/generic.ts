@@ -21,22 +21,7 @@ export async function scrapeGenericSource(
     console.warn(`[Scraper Genérico] Erro ao consultar ${source.name}:`, err);
   }
 
-  // Gera dados realistas simulados para fontes sem parser específico no protótipo
-  return [
-    {
-      source_portal: source.name,
-      source_id: `gen_${source.slug}_${concelho}_1`,
-      title: `Apartamento Fantástico em ${concelho} (${source.name})`,
-      price: 250000 + Math.floor(Math.random() * 150000),
-      area_m2: 85 + Math.floor(Math.random() * 40),
-      typology: 'T2',
-      condition: 'Usado',
-      freguesia: concelho,
-      concelho: concelho,
-      district: concelho,
-      cover_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-      gallery: ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800'],
-      original_url: url,
-    }
-  ];
+  // O scraper genérico de momento não produz dados falsos para evitar confusões na UI com imagens genéricas e localizações erradas.
+  console.log(`[Scraper Genérico] Fonte ${source.name} não tem scraper implementado. A ignorar.`);
+  return [];
 }
