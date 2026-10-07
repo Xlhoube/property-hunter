@@ -79,11 +79,13 @@ export async function fetchProperties(filters?: PropertyFilterParams): Promise<P
   }
 
   if (filters?.minPrice) {
-    result = result.filter((p) => p.price >= filters.minPrice!);
+    const minP = filters.minPrice < 10000 ? filters.minPrice * 1000 : filters.minPrice;
+    result = result.filter((p) => p.price >= minP);
   }
 
   if (filters?.maxPrice) {
-    result = result.filter((p) => p.price <= filters.maxPrice!);
+    const maxP = filters.maxPrice < 10000 ? filters.maxPrice * 1000 : filters.maxPrice;
+    result = result.filter((p) => p.price <= maxP);
   }
 
   if (filters?.minArea) {
