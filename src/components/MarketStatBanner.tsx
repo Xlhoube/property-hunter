@@ -57,7 +57,7 @@ export const MarketStatBanner: React.FC<MarketStatBannerProps> = ({ properties }
           <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400 dark:text-slate-500" />
         </div>
         <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
-          <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{avgM2.toLocaleString('pt-PT')}€</span>
+          <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{avgM2?.toLocaleString('pt-PT') ?? '0'}€</span>
           <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">por m²</span>
         </div>
       </div>

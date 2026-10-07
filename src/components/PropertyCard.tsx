@@ -117,9 +117,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 )}
               </div>
               <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {property.price_m2.toLocaleString('pt-PT')} €/m²
+                {property.price_m2?.toLocaleString('pt-PT') ?? '0'} €/m²
                 <span className="text-slate-400 dark:text-slate-600 mx-1">·</span>
-                <span className="text-slate-400 dark:text-slate-500">Média: {property.zone_avg_price_m2.toLocaleString('pt-PT')}€</span>
+                <span className="text-slate-400 dark:text-slate-500">Média: {property.zone_avg_price_m2?.toLocaleString('pt-PT') ?? '0'}€</span>
               </div>
             </div>
 
