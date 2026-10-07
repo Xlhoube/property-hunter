@@ -22,10 +22,31 @@ const COLL_PROPERTIES = process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_PROPERTIES |
 export async function addOrUpdatePropertyServer(property: Property): Promise<Property> {
   try {
     if (projectId && projectId !== 'property-hunter' && apiKey) {
-      const existing = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, [
-        Query.equal('source_id', property.source_id),
-        Query.limit(1)
-      ]);
+      let existingDocId: string | null = null;
+
+      if (property.original_url) {
+        try {
+          const byUrl = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, [
+            Query.equal('original_url', property.original_url),
+            Query.limit(1)
+          ]);
+          if (byUrl && byUrl.documents.length > 0) {
+            existingDocId = byUrl.documents[0].$id;
+          }
+        } catch (e) {}
+      }
+
+      if (!existingDocId && property.source_id) {
+        try {
+          const bySource = await databases.listDocuments(DATABASE_ID, COLL_PROPERTIES, [
+            Query.equal('source_id', property.source_id),
+            Query.limit(1)
+          ]);
+          if (bySource && bySource.documents.length > 0) {
+            existingDocId = bySource.documents[0].$id;
+          }
+        } catch (e) {}
+      }
       
       const payload: any = { ...property };
       delete payload.price_history;
@@ -33,8 +54,8 @@ export async function addOrUpdatePropertyServer(property: Property): Promise<Pro
       delete payload.distance_km;
       delete payload.gallery;
       
-      if (existing && existing.documents.length > 0) {
-        await databases.updateDocument(DATABASE_ID, COLL_PROPERTIES, existing.documents[0].$id, payload);
+      if (existingDocId) {
+        await databases.updateDocument(DATABASE_ID, COLL_PROPERTIES, existingDocId, payload);
       } else {
         await databases.createDocument(DATABASE_ID, COLL_PROPERTIES, ID.unique(), payload);
       }
@@ -145,5 +166,16 @@ export async function fetchPropertiesServer(filters?: PropertyFilterParams): Pro
       break;
   }
 
-  return result;
+  // Deduplicação defensiva por original_url e por título+concelho+preço
+  const seenKeys = new Set<string>();
+  const uniqueResult: Property[] = [];
+  for (const p of result) {
+    const key = p.original_url || `${p.title}_${p.concelho}_${p.price}`;
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      uniqueResult.push(p);
+    }
+  }
+
+  return uniqueResult;
 }

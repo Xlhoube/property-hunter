@@ -101,7 +101,6 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
             last_scraped_at: timestamp,
           };
 
-          addOrUpdatePropertyServer(updatedProp);
           await addOrUpdatePropertyServer(updatedProp);
           updatedCount++;
           if (changeStats.type === 'drop') {
@@ -141,7 +140,6 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
         }
       } else {
         // Novo imóvel detectado no portal
-        addOrUpdatePropertyServer(scraped);
         await addOrUpdatePropertyServer(scraped);
         newCount++;
 

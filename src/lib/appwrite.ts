@@ -130,7 +130,18 @@ export async function fetchProperties(filters?: PropertyFilterParams): Promise<P
       break;
   }
 
-  return result;
+  // Deduplicação defensiva por original_url e por título+concelho+preço
+  const seenKeys = new Set<string>();
+  const uniqueResult: Property[] = [];
+  for (const p of result) {
+    const key = p.original_url || `${p.title}_${p.concelho}_${p.price}`;
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      uniqueResult.push(p);
+    }
+  }
+
+  return uniqueResult;
 }
 
 export async function fetchMarketZones(): Promise<MarketZone[]> {
