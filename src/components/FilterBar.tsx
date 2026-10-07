@@ -78,7 +78,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             ...filters,
             userLocation: { lat, lng },
             radiusKm: filters.radiusKm !== undefined ? filters.radiusKm : 25,
-            concelho: data.success && data.concelho ? data.concelho : 'Todos',
+            concelho: 'Todos',
             searchQuery: '',
             sortBy: 'distance_asc',
           });

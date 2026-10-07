@@ -58,7 +58,7 @@ export async function fetchProperties(filters?: PropertyFilterParams): Promise<P
     );
   }
 
-  if (filters?.concelho && filters.concelho !== 'Todos') {
+  if (filters?.concelho && filters.concelho !== 'Todos' && !filters?.radiusKm) {
     result = result.filter((p) => p.concelho.toLowerCase() === filters.concelho?.toLowerCase());
   }
 

@@ -12,6 +12,7 @@ import { Property, PropertyFilterParams } from '@/types/property';
 import { fetchProperties } from '@/lib/appwrite';
 import { exportPropertiesToCSV } from '@/lib/export-csv';
 import { ScraperResult } from '@/lib/scraper-service';
+import { CONCELHO_COORDINATES } from '@/lib/geo';
 import { Building, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
@@ -71,7 +72,9 @@ export default function HomePage() {
   }, [filters]);
 
   const availableConcelhos = useMemo(() => {
-    const list = Array.from(new Set(properties.map((p) => p.concelho))).filter(Boolean);
+    const fromProps = properties.map((p) => p.concelho);
+    const fromCoords = Object.keys(CONCELHO_COORDINATES);
+    const list = Array.from(new Set([...fromProps, ...fromCoords])).filter(Boolean);
     return list.sort();
   }, [properties]);
 

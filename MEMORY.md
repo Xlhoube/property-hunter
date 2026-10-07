@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.9.4
+- **Versão Actual:** v0.9.5
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -54,7 +54,6 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-016 (2026-10-06):** Categorização Alargada do Mercado Imobiliário em Portugal. Enriquecida a matriz de fontes com 12 referências organizadas em 4 categorias estratégicas: Portais Agregadores (Idealista, Imovirtual, CasaSAPO, SuperCasa, BPI Expresso), Redes de Mediação (RE/MAX, Century 21, KW, ERA), Classificados Directos (OLX, CustoJusto) e Dados/Leilões Judiciais (CASAFARI, Finanças/Penhoras, e-Leilões, Citius). Adicionadas etiquetas visuais e filtros dedicados por categoria na página `/fontes`.
 - **ADR-017 (2026-10-06):** Filtros Avançados por Intervalo de Preço e Área Útil. Integrado painel expansível na `FilterBar` com campos numéricos para Preço Mínimo (€), Preço Máximo (€), Área Mínima (m²) e Área Máxima (m²), com botão de acção rápida para limpeza de intervalos e feedback reactivo na listagem de imóveis.
 - **ADR-018 (2026-10-06):** Motor de Prospecção Dinâmico para Fontes Arbitrárias. A rotina `scrapeAllPortals` foi refatorizada para não estar limitada aos 3 portais nativos (Imovirtual, Idealista, CasaSAPO). Passou a consultar dinamicamente todas as fontes activas configuradas pelo utilizador em `/fontes`. Para fontes sem scraper estruturado, foi implementado um `scrapeGenericSource` com extração baseada no link e simulação de dados compatível com o protótipo.
-  
 - **ADR-019 (2026-10-06):** Inclusão da Tipologia Bi-Familiar. Adicionada a tipologia "Bi-Familiar" à listagem principal de `PropertyTypology`, filtros da interface e lógica de extração textual nos scrapers.
 - **ADR-020 (2026-10-06):** Correção do Motor de Escrita Cloud. O `scraper-service` foi atualizado para guardar os novos imóveis e descidas de preço diretamente na Appwrite. Implementado módulo `server-appwrite.ts` que utiliza o SDK Node e a `APPWRITE_API_KEY` para superar as restrições de permissões "create" num ambiente serverless, resolvendo o bug onde os resultados da prospecção apenas atualizavam a memória temporal e o utilizador ficava restrito a ver 10 itens seccionados da Cloud.
 - **ADR-021 (2026-10-06):** Correção do Motor de Leitura Cloud (Frontend Proxy). A interface do utilizador não conseguia ver as listagens de imóveis após a prospeção devido à falta de permissões públicas (Guest) na Appwrite. A função `fetchProperties` chamada pelo lado cliente foi refatorada para fazer um pedido POST à rota `/api/properties`, que por sua vez utiliza o SDK Server com `API_KEY` para ultrapassar as restrições e apresentar os resultados fidedignos em tempo-real na UI.
@@ -65,10 +64,11 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-026 (2026-10-07):** Resolução de Erro de Build no Vercel (Scraper Appwrite). A transição para gravação nativa na Appwrite (ADR-020) deixou chamadas esquecidas à função obsoleta `addOrUpdatePropertyInMemory` no `scraper-service.ts`, o que impedia a compilação de produção. Estas foram removidas, assegurando que o motor escreve e prossegue utilizando unicamente as rotas assíncronas do `server-appwrite`.
 - **ADR-027 (2026-10-07):** Prevenção de Client-side Exceptions em Formatações. Foi detetado um erro fatal no frontend (`TypeError: Cannot read properties of null (reading 'toLocaleString')`) que bloqueava o ecrã. Ocorria quando dados incompletos da base de dados eram expostos aos componentes (`PropertyCard`, `MarketStatBanner`). Resolvido mediante implementação de *optional chaining* e fallback para zero (`?.toLocaleString('pt-PT') ?? '0'`).
 - **ADR-028 (2026-10-07):** Tolerância de Latência nos Testes de Fontes. Os botões de diagnóstico de ligação na página `/fontes` exibiam falsos negativos (`Erro: This operation was aborted`) em sites institucionais lentos (Finanças, e-Leilões) devido a um timeout restritivo de 4 segundos. O limite de interrupção (`AbortController`) foi ampliado para 10 segundos para conferir tolerância de resposta.
+- **ADR-029 (2026-10-07):** Correcção do Filtro Geográfico por Raio e Alargamento de Concelhos. Identificada a causa para novos imóveis extraídos na ronda não surgirem no ecrã com raio activo: o filtro de pesquisa por raio bloqueava a consulta a um único concelho textual em vez de permitir múltiplos concelhos vizinhos, e imóveis de concelhos fora da lista de 31 coordenadas de referência eram descartados. A matriz `CONCELHO_COORDINATES` foi expandida para cobrir dezenas de municípios portugueses, e o filtro de concelho exacto foi relaxado quando o raio geográfico está activo.
 
 ---
 
-## O que já funciona (v0.9.4)
+## O que já funciona (v0.9.5)
 - **Motor de Prospecção Dinâmico:** A "Ronda" pesquisa simultaneamente em todas as fontes activas da base de dados, independentemente de serem portais nativos ou fontes personalizadas, recorrendo a um crawler genérico (`generic.ts`) como fallback para recolha de oportunidades.
 - **Filtros Avançados por Intervalo:** Limites de Preço Mín/Máx (€) e Área Mín/Máx (m²) no painel expansível da `FilterBar` com filtragem reactiva instantânea.
 - **Categorias Estratégicas de Fontes:** 12 fontes categorizadas em Portais, Redes de Mediação, Classificados e Leilões Judiciais/Finanças, com abas de selecção rápida e etiquetas nos cartões.

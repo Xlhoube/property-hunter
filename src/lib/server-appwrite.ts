@@ -51,8 +51,8 @@ export async function fetchPropertiesServer(filters?: PropertyFilterParams): Pro
     if (projectId && projectId !== 'property-hunter' && apiKey) {
       const queries: any[] = [Query.limit(100), Query.orderDesc('last_scraped_at')];
 
-      // Filtros exatos que a Cloud suporta via Queries
-      if (filters?.concelho && filters.concelho !== 'Todos') {
+      // Filtros exatos que a Cloud suporta via Queries (só restringe concelho se pesquisa por raio não estiver ativa)
+      if (filters?.concelho && filters.concelho !== 'Todos' && !filters?.radiusKm) {
         queries.push(Query.equal('concelho', filters.concelho));
       }
       if (filters?.condition && filters.condition !== 'Todas') {
