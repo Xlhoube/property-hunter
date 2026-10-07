@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.9.1
+- **Versão Actual:** v0.9.2
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -62,10 +62,11 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-023 (2026-10-06):** Gestão em Lote e Ligação de Georeferência. Foram adicionados dois botões rápidos na barra de categorias ("Ativar Todas" e "Desativar Todas") que percorrem todas as fontes no ecrã de Fontes e geram requisições em paralelo (`Promise.allSettled`) à API para mudar os seus estados simultaneamente. Em paralelo, a atribuição do concelho detetado via geolocalização foi corrigida para garantir o rastreio local fidedigno.
 - **ADR-024 (2026-10-06):** Correção do extrator de imagens Imovirtual. O array de imagens do Imovirtual `__NEXT_DATA__` estava a ser lido indevidamente como um objeto plano, resultando sempre na injeção da imagem "placeholder" do Unsplash. A lógica foi atualizada para lidar com a estrutura de Array que o Imovirtual realmente envia.
 - **ADR-025 (2026-10-06):** Otimização da Escrita na Base de Dados. A prospeção manual (UI) passou a enviar não apenas o local (`concelho`), mas toda a estrutura de filtros ativa (Tipologia, Preços, Áreas) ao motor de Scrape (via `/api/cron/scrape`). Em vez de extrair e guardar os 20 primeiros imóveis independentemente do seu tipo (sobrecarregando a base de dados com anúncios indesejados), o Scraper processa e deita fora em JavaScript os imóveis recolhidos que não correspondam à necessidade atual, e só os que passarem no filtro são guardados na Appwrite.
+- **ADR-026 (2026-10-07):** Resolução de Erro de Build no Vercel (Scraper Appwrite). A transição para gravação nativa na Appwrite (ADR-020) deixou chamadas esquecidas à função obsoleta `addOrUpdatePropertyInMemory` no `scraper-service.ts`, o que impedia a compilação de produção. Estas foram removidas, assegurando que o motor escreve e prossegue utilizando unicamente as rotas assíncronas do `server-appwrite`.
 
 ---
 
-## O que já funciona (v0.9.1)
+## O que já funciona (v0.9.2)
 - **Motor de Prospecção Dinâmico:** A "Ronda" pesquisa simultaneamente em todas as fontes activas da base de dados, independentemente de serem portais nativos ou fontes personalizadas, recorrendo a um crawler genérico (`generic.ts`) como fallback para recolha de oportunidades.
 - **Filtros Avançados por Intervalo:** Limites de Preço Mín/Máx (€) e Área Mín/Máx (m²) no painel expansível da `FilterBar` com filtragem reactiva instantânea.
 - **Categorias Estratégicas de Fontes:** 12 fontes categorizadas em Portais, Redes de Mediação, Classificados e Leilões Judiciais/Finanças, com abas de selecção rápida e etiquetas nos cartões.

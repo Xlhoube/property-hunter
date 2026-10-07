@@ -32,7 +32,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
 
   try {
     let concelhosToScrape = ['Lisboa', 'Porto', 'Cascais', 'Braga'];
-    
+
     if (filters?.userLocation && filters?.radiusKm) {
       const radiusConcelhos = getConcelhosWithinRadius(filters.userLocation.lat, filters.userLocation.lng, filters.radiusKm);
       if (radiusConcelhos.length > 0) {
@@ -41,9 +41,9 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
     } else if (targetConcelho && targetConcelho !== 'Todos') {
       concelhosToScrape = [targetConcelho];
     }
-    
+
     const portalReport = await scrapeAllPortals(concelhosToScrape, 15);
-    
+
     // Filtro JS para evitar sobrecarga da DB com imóveis que o utilizador não quer
     let validProperties = portalReport.normalized_properties;
     if (filters) {
@@ -63,7 +63,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
         validProperties = validProperties.filter(p => p.area_m2 <= filters.maxArea);
       }
     }
-    
+
     console.log(`[Scraper Service] Crawlers concluídos: ${portalReport.normalized_properties.length} recolhidos. ${validProperties.length} correspondem aos filtros.`);
 
     for (const scraped of validProperties) {
@@ -101,7 +101,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
             last_scraped_at: timestamp,
           };
 
-          addOrUpdatePropertyInMemory(updatedProp);
+          addOrUpdatePropertyServer(updatedProp);
           await addOrUpdatePropertyServer(updatedProp);
           updatedCount++;
           if (changeStats.type === 'drop') {
@@ -141,7 +141,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
         }
       } else {
         // Novo imóvel detectado no portal
-        addOrUpdatePropertyInMemory(scraped);
+        addOrUpdatePropertyServer(scraped);
         await addOrUpdatePropertyServer(scraped);
         newCount++;
 
