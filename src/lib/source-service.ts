@@ -325,7 +325,7 @@ export async function testSourceUrl(url: string): Promise<{ success: boolean; la
   const startTime = Date.now();
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     const response = await fetch(url, {
       method: 'GET',

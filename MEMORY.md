@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.9.3
+- **Versão Actual:** v0.9.4
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -64,10 +64,11 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-025 (2026-10-06):** Otimização da Escrita na Base de Dados. A prospeção manual (UI) passou a enviar não apenas o local (`concelho`), mas toda a estrutura de filtros ativa (Tipologia, Preços, Áreas) ao motor de Scrape (via `/api/cron/scrape`). Em vez de extrair e guardar os 20 primeiros imóveis independentemente do seu tipo (sobrecarregando a base de dados com anúncios indesejados), o Scraper processa e deita fora em JavaScript os imóveis recolhidos que não correspondam à necessidade atual, e só os que passarem no filtro são guardados na Appwrite.
 - **ADR-026 (2026-10-07):** Resolução de Erro de Build no Vercel (Scraper Appwrite). A transição para gravação nativa na Appwrite (ADR-020) deixou chamadas esquecidas à função obsoleta `addOrUpdatePropertyInMemory` no `scraper-service.ts`, o que impedia a compilação de produção. Estas foram removidas, assegurando que o motor escreve e prossegue utilizando unicamente as rotas assíncronas do `server-appwrite`.
 - **ADR-027 (2026-10-07):** Prevenção de Client-side Exceptions em Formatações. Foi detetado um erro fatal no frontend (`TypeError: Cannot read properties of null (reading 'toLocaleString')`) que bloqueava o ecrã. Ocorria quando dados incompletos da base de dados eram expostos aos componentes (`PropertyCard`, `MarketStatBanner`). Resolvido mediante implementação de *optional chaining* e fallback para zero (`?.toLocaleString('pt-PT') ?? '0'`).
+- **ADR-028 (2026-10-07):** Tolerância de Latência nos Testes de Fontes. Os botões de diagnóstico de ligação na página `/fontes` exibiam falsos negativos (`Erro: This operation was aborted`) em sites institucionais lentos (Finanças, e-Leilões) devido a um timeout restritivo de 4 segundos. O limite de interrupção (`AbortController`) foi ampliado para 10 segundos para conferir tolerância de resposta.
 
 ---
 
-## O que já funciona (v0.9.3)
+## O que já funciona (v0.9.4)
 - **Motor de Prospecção Dinâmico:** A "Ronda" pesquisa simultaneamente em todas as fontes activas da base de dados, independentemente de serem portais nativos ou fontes personalizadas, recorrendo a um crawler genérico (`generic.ts`) como fallback para recolha de oportunidades.
 - **Filtros Avançados por Intervalo:** Limites de Preço Mín/Máx (€) e Área Mín/Máx (m²) no painel expansível da `FilterBar` com filtragem reactiva instantânea.
 - **Categorias Estratégicas de Fontes:** 12 fontes categorizadas em Portais, Redes de Mediação, Classificados e Leilões Judiciais/Finanças, com abas de selecção rápida e etiquetas nos cartões.
