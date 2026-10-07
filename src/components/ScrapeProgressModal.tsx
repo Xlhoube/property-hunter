@@ -135,6 +135,20 @@ export const ScrapeProgressModal: React.FC<ScrapeProgressModalProps> = ({
                     Todos os anúncios consultados já se encontram atualizados na base de dados.
                   </div>
                 )}
+                
+                {result.errors && result.errors.length > 0 && (
+                  <div className="rounded-xl border border-orange-200 bg-orange-50/60 dark:border-orange-900/60 dark:bg-orange-950/30 p-3 mt-4 space-y-2 text-xs">
+                    <div className="font-bold text-orange-800 dark:text-orange-400 mb-2 flex items-center gap-1.5">
+                      <AlertTriangle className="h-4 w-4" />
+                      Algumas fontes não puderam ser extraídas:
+                    </div>
+                    <ul className="list-disc pl-5 space-y-1 text-orange-700 dark:text-orange-300/80">
+                      {result.errors.map((err, idx) => (
+                        <li key={idx}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
