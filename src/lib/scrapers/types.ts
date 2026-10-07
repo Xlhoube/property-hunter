@@ -28,20 +28,25 @@ export function getRandomUserAgent(): string {
 }
 
 export function extractTypology(text: string): PropertyTypology {
+  const textLower = text.toLowerCase();
+  
+  // Prioridade para tipos de imóvel antes de olhar para a tipologia T(x)
+  if (textLower.includes('bi-familiar') || textLower.includes('bifamiliar') || textLower.includes('bi familiar')) return 'Bi-Familiar';
+  if (textLower.includes('moradia') || textLower.includes('vivenda') || textLower.includes('villa')) return 'Moradia';
+  if (textLower.includes('terreno') || textLower.includes('lote')) return 'Terreno';
+
+  // Se não é moradia nem terreno, procurar por T0 a T4+
   const match = text.match(/\bT([0-9])(?:\+([0-9]))?\b/i);
-  if (!match) {
-    const textLower = text.toLowerCase();
-    if (textLower.includes('bi-familiar') || textLower.includes('bifamiliar') || textLower.includes('bi familiar')) return 'Bi-Familiar';
-    if (textLower.includes('moradia')) return 'Moradia';
-    if (textLower.includes('terreno')) return 'Terreno';
-    return 'T2';
+  if (match) {
+    const num = parseInt(match[1], 10);
+    if (num === 0) return 'T0';
+    if (num === 1) return 'T1';
+    if (num === 2) return 'T2';
+    if (num === 3) return 'T3';
+    return 'T4+';
   }
-  const num = parseInt(match[1], 10);
-  if (num === 0) return 'T0';
-  if (num === 1) return 'T1';
-  if (num === 2) return 'T2';
-  if (num === 3) return 'T3';
-  return 'T4+';
+  
+  return 'T2'; // Fallback
 }
 
 export function parsePrice(priceText: string): number {
