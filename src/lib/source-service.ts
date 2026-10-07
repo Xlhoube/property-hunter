@@ -1,9 +1,9 @@
 import { PropertySource, NewSourceInput } from '@/types/source';
 
-// Base comum para fontes nativas pausadas por defeito
+// Base comum para fontes nativas pausadas por defeito (incompatíveis com fetch simples)
 const NATIVE_DEFAULTS = {
-  enabled: true,
-  status: 'active' as const,
+  enabled: false,
+  status: 'paused' as const,
   totalScrapedCount: 0,
   isCustom: false,
   createdAt: '2026-10-01T00:00:00.000Z',
