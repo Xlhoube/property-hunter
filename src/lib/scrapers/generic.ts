@@ -60,6 +60,11 @@ export async function scrapeGenericSource(
     if (!price || price < 5000) return; // Ignorar rendas ou valores muito baixos
 
     const title = $el.find('h1, h2, h3, h4, [class*="title"]').first().text().trim() || `Imóvel em ${concelho}`;
+    
+    // Filtro heurístico anti-banners/publicidade
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('crédito') || titleLower.includes('credito') || titleLower.includes('empréstimo') || titleLower.includes('seguro')) return;
+
     const typology = extractTypology(title + ' ' + text);
     const area = parseArea(text);
 

@@ -50,8 +50,19 @@ export function extractTypology(text: string): PropertyTypology {
 }
 
 export function parsePrice(priceText: string): number {
-  const cleaned = priceText.replace(/[^0-9]/g, '');
-  return cleaned ? parseInt(cleaned, 10) : 0;
+  // Procura o valor imediatamente antes do símbolo €
+  const matchEuro = priceText.match(/([0-9]{1,3}(?:[.,\s]?[0-9]{3})*)\s*€/);
+  if (matchEuro) {
+    const cleaned = matchEuro[1].replace(/[^0-9]/g, '');
+    return cleaned ? parseInt(cleaned, 10) : 0;
+  }
+  // Fallback: pega no primeiro grande bloco numérico
+  const matchFirst = priceText.match(/[0-9]{1,3}(?:[.,\s]?[0-9]{3})*/);
+  if (matchFirst) {
+    const cleaned = matchFirst[0].replace(/[^0-9]/g, '');
+    return cleaned ? parseInt(cleaned, 10) : 0;
+  }
+  return 0;
 }
 
 export function parseArea(areaText: string): number {
