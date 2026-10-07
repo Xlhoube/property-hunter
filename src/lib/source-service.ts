@@ -167,13 +167,19 @@ const INITIAL_SOURCES: PropertySource[] = [
     slug: 'custojusto',
     baseUrl: 'https://www.custojusto.pt',
     searchUrlPattern: 'https://www.custojusto.pt/{concelho}/imobiliario',
-    type: 'html',
+    enabled: true,
+    type: 'scraper',
     category: 'classificados',
     intervalHours: 12,
-    description: 'Classificados com elevada percentagem de imóveis anunciados directamente por particulares.',
+    status: 'active',
+    totalScrapedCount: 85,
+    lastScrapeAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+    description: 'Classificados com elevada percentagem de imóveis anunciados directamente por particulares, apartamentos e moradias.',
     iconColor: 'bg-amber-600 text-white dark:bg-amber-500',
-    ...NATIVE_DEFAULTS,
+    isCustom: false,
+    createdAt: '2026-10-01T00:00:00.000Z',
   },
+
 
   // 4. Dados de Mercado, Leilões e Oportunidades Especiais
   {

@@ -28,38 +28,44 @@ interface ImovirtualItem {
 
 export async function scrapeImovirtual(concelho = 'lisboa', maxItems = 20): Promise<ScrapedRawProperty[]> {
   const concelhoNormalized = concelho.toLowerCase().trim().replace(/\s+/g, '-');
-  const url = `https://www.imovirtual.com/pt/resultados/comprar/apartamento/${concelhoNormalized}`;
+  const urls = [
+    `https://www.imovirtual.com/pt/resultados/comprar/apartamento/${concelhoNormalized}`,
+    `https://www.imovirtual.com/pt/resultados/comprar/moradia/${concelhoNormalized}`,
+  ];
   
-  console.log(`[Scraper Imovirtual] A iniciar recolha para concelho "${concelho}" em ${url}`);
+  console.log(`[Scraper Imovirtual] A iniciar recolha para concelho "${concelho}" (apartamentos e moradias)`);
+  const results: ScrapedRawProperty[] = [];
 
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': getRandomUserAgent(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
-      },
-      next: { revalidate: 0 },
-    });
+  for (const url of urls) {
+    if (results.length >= maxItems) break;
 
-    if (!res.ok) {
-      console.warn(`[Scraper Imovirtual] Resposta com código ${res.status}`);
-      return [];
-    }
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': getRandomUserAgent(),
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
+        },
+        next: { revalidate: 0 },
+      });
 
-    const html = await res.text();
-    const $ = cheerio.load(html);
-    const scriptContent = $('#__NEXT_DATA__').html();
+      if (!res.ok) {
+        console.warn(`[Scraper Imovirtual] Resposta com código ${res.status} em ${url}`);
+        continue;
+      }
 
-    if (!scriptContent) {
-      console.warn('[Scraper Imovirtual] Tag #__NEXT_DATA__ não encontrada.');
-      return [];
-    }
+      const html = await res.text();
+      const $ = cheerio.load(html);
+      const scriptContent = $('#__NEXT_DATA__').html();
 
-    const nextData = JSON.parse(scriptContent);
-    const items: ImovirtualItem[] = nextData?.props?.pageProps?.data?.searchAds?.items || [];
+      if (!scriptContent) {
+        console.warn('[Scraper Imovirtual] Tag #__NEXT_DATA__ não encontrada.');
+        continue;
+      }
 
-    const results: ScrapedRawProperty[] = [];
+      const nextData = JSON.parse(scriptContent);
+      const items: ImovirtualItem[] = nextData?.props?.pageProps?.data?.searchAds?.items || [];
+
 
     for (const item of items) {
       if (results.length >= maxItems) break;
@@ -108,11 +114,12 @@ export async function scrapeImovirtual(concelho = 'lisboa', maxItems = 20): Prom
         original_url,
       });
     }
-
-    console.log(`[Scraper Imovirtual] Concluído com sucesso: ${results.length} imóveis extraídos.`);
-    return results;
-  } catch (err) {
-    console.error('[Scraper Imovirtual] Falha na execução:', err);
-    return [];
+  } catch (err: any) {
+    console.warn(`[Scraper Imovirtual] Falha na recolha para ${url}:`, err.message);
   }
 }
+
+  console.log(`[Scraper Imovirtual] Concluído com sucesso: ${results.length} imóveis extraídos.`);
+  return results;
+}
+

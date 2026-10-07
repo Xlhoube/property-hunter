@@ -8,8 +8,9 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.9.7
+- **Versão Actual:** v0.9.8
 - **Data de Início:** 2026-10-05
+
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
 - **Ambiente de Deploy:** Vercel (Frontend & Cron Jobs) + Appwrite (Database, Collections & Auth)
@@ -71,6 +72,14 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-033 (2026-10-07):** Persistência de Fontes Activas em Ambiente Serverless. O utilizador activava todas as fontes no UI, mas a pesquisa continuava a devolver quase exclusivamente anúncios do Imovirtual. A causa identificada foi a natureza *stateless* das *serverless functions* da Vercel: as fontes eram activadas numa variável global em memória (`inMemorySources`), mas a rota de `scrape` (`/api/cron/scrape`) era invocada numa instância limpa onde apenas 3 portais estavam activados por defeito. A constante `NATIVE_DEFAULTS` foi alterada para `enabled: true` por defeito, forçando o arranque do crawler genérico em todas as plataformas em cada ronda (sujeito à taxa de sucesso heurística do `generic.ts`).
 - **ADR-034 (2026-10-07):** Filtragem de Banners Publicitários e Correcção de Parse Numérico. Durante a análise do scraper genérico em sites não-nativos (como o CustoJusto), verificou-se que banners do Google Ads (ex: "Crédito pessoal a 160,08€ por mês para 10.000€") eram capturados como imóveis. A função `parsePrice` estava a concatenar todos os dígitos da string, gerando valores como `1.600.810.000 €`, o que contornava a barreira de preço mínimo (5000€). O Regex do `parsePrice` foi reforçado para capturar apenas blocos contínuos antes do sinal €, e o scraper genérico foi afinado com uma lista de bloqueio de palavras-chave ("crédito", "empréstimo", "seguro") no título.
 - **ADR-035 (2026-10-07):** Auto-Conversão de Preços Curtos nos Filtros. Utilizadores tendem a escrever "280" em vez de "280000" (ou 280.000) nos filtros de Preço Máximo, resultando em listas de pesquisa vazias porque o filtro avaliava o número de forma literal (`price <= 280€`). Para melhorar a experiência do utilizador (UX) sem alterar a interface instantaneamente sob os dedos (saltos de valor), a lógica de filtragem foi alterada para auto-multiplicar por 1000 qualquer limite de preço inferior a 10.000€ no servidor (`se valor < 10000, valor = valor * 1000`).
+- **ADR-036 (2026-10-07):** Implementação de Scraper Nativo para CustoJusto e Suporte Completo a Moradias e Múltiplas Fontes.
+  Identificada a causa raiz de surgirem apenas anúncios do Imovirtual e nenhuma moradia:
+  1. O Idealista devolve HTTP 403 (bloqueado por WAF/Cloudflare sem chave proxy).
+  2. O CasaSAPO entrava em rate limit HTTP 429 ("Site Offline") perante múltiplos acessos sequenciais rápidos.
+  3. O Imovirtual tinha o URL fixo em `/apartamento/`, excluindo intencionalmente todas as moradias e bifamiliares.
+  4. O CustoJusto não possuía scraper dedicado e o crawler genérico falhava a grelha em Tailwind.
+  Foi desenvolvido um scraper nativo dedicado para o CustoJusto (`src/lib/scrapers/custojusto.ts`) que extrai apartamentos e moradias sem bloqueios de WAF. O Imovirtual foi atualizado para consultar tanto apartamentos como moradias. CustoJusto foi promovido a fonte nativa ativa por defeito, garantindo diversidade equilibrada e imediata na pesquisa (validado com sucesso em testes integrados: Imovirtual, CustoJusto e CasaSAPO).
+
 
 ---
 

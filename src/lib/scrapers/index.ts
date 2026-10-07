@@ -1,6 +1,7 @@
 import { Property } from '@/types/property';
 import { ScrapedRawProperty } from './types';
 import { scrapeImovirtual } from './imovirtual';
+import { scrapeCustoJusto } from './custojusto';
 import { scrapeCasaSapo } from './casasapo';
 import { scrapeIdealista } from './idealista';
 import { scrapeGenericSource } from './generic';
@@ -18,6 +19,7 @@ export interface MultiPortalScrapeReport {
   concelhos_scanned: string[];
   total_raw_found: number;
   imovirtual_count: number;
+  custojusto_count: number;
   casasapo_count: number;
   idealista_count: number;
   normalized_properties: Property[];
@@ -44,6 +46,8 @@ export async function scrapeAllPortals(
         let results: ScrapedRawProperty[] = [];
         if (source.slug === 'imovirtual') {
           results = await scrapeImovirtual(concelho, maxItemsPerPortal);
+        } else if (source.slug === 'custojusto') {
+          results = await scrapeCustoJusto(concelho, maxItemsPerPortal);
         } else if (source.slug === 'casasapo') {
           results = await scrapeCasaSapo(concelho, maxItemsPerPortal);
         } else if (source.slug === 'idealista') {
@@ -56,6 +60,7 @@ export async function scrapeAllPortals(
         throw { source, err };
       }
     });
+
 
     const settled = await Promise.allSettled(promises);
     for (const res of settled) {
@@ -137,9 +142,11 @@ export async function scrapeAllPortals(
     concelhos_scanned: concelhos,
     total_raw_found: rawList.length,
     imovirtual_count: sourceCounts['imovirtual'] || 0,
+    custojusto_count: sourceCounts['custojusto'] || 0,
     casasapo_count: sourceCounts['casasapo'] || 0,
     idealista_count: sourceCounts['idealista'] || 0,
     normalized_properties: normalizedProperties,
+
     errors,
   };
 }

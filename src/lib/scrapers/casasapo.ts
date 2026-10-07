@@ -53,10 +53,11 @@ export async function scrapeCasaSapo(concelho = 'lisboa', maxItems = 20): Promis
     }
   }
 
-  if (!html || html.length < 1000) {
-    console.warn('[Scraper CasaSAPO] Não foi possível obter o HTML da listagem.');
+  if (!html || html.length < 5000 || html.includes('Site Offline') || html.includes('tráfego fora do normal')) {
+    console.warn('[Scraper CasaSAPO] CasaSAPO temporariamente indisponível ou com limite de pedidos activo (429/Offline). A continuar com as restantes fontes...');
     return [];
   }
+
 
   const $ = cheerio.load(html);
   const results: ScrapedRawProperty[] = [];
