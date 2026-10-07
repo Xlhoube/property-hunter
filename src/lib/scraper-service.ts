@@ -14,6 +14,7 @@ export interface ScraperResult {
   price_drops: number;
   notifications_sent: number;
   details: string[];
+  errors?: string[];
 }
 
 export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
@@ -29,6 +30,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
   let dropsCount = 0;
   let notificationsSent = 0;
   const details: string[] = [];
+  let scraperErrors: string[] = [];
 
   try {
     let concelhosToScrape = ['Lisboa', 'Porto', 'Cascais', 'Braga'];
@@ -43,6 +45,7 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
     }
 
     const portalReport = await scrapeAllPortals(concelhosToScrape, 15);
+    scraperErrors = portalReport.errors || [];
 
     // Filtro JS para evitar sobrecarga da DB com imóveis que o utilizador não quer
     let validProperties = portalReport.normalized_properties;
@@ -185,5 +188,6 @@ export async function runHourlyScraper(filters?: any): Promise<ScraperResult> {
     price_drops: dropsCount,
     notifications_sent: notificationsSent,
     details,
+    errors: scraperErrors,
   };
 }

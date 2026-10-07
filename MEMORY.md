@@ -8,7 +8,7 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 
 ## Ficha Técnica do Projecto
 - **Nome:** Property Hunter (Casas a Venda)
-- **Versão Actual:** v0.9.6
+- **Versão Actual:** v0.9.7
 - **Data de Início:** 2026-10-05
 - **Nível de Risco:** 2 (Perco algum tempo / Gestão de dados de prospecção)
 - **Ritmo de Trabalho:** Protótipo Rápido (Resultados imediatos com interface limpa e iterativa)
@@ -66,10 +66,11 @@ A plataforma cruza continuamente os imóveis com referências de preço médio p
 - **ADR-028 (2026-10-07):** Tolerância de Latência nos Testes de Fontes. Os botões de diagnóstico de ligação na página `/fontes` exibiam falsos negativos (`Erro: This operation was aborted`) em sites institucionais lentos (Finanças, e-Leilões) devido a um timeout restritivo de 4 segundos. O limite de interrupção (`AbortController`) foi ampliado para 10 segundos para conferir tolerância de resposta.
 - **ADR-029 (2026-10-07):** Correcção do Filtro Geográfico por Raio e Alargamento de Concelhos. Identificada a causa para novos imóveis extraídos na ronda não surgirem no ecrã com raio activo: o filtro de pesquisa por raio bloqueava a consulta a um único concelho textual em vez de permitir múltiplos concelhos vizinhos, e imóveis de concelhos fora da lista de 31 coordenadas de referência eram descartados. A matriz `CONCELHO_COORDINATES` foi expandida para cobrir dezenas de municípios portugueses, e o filtro de concelho exacto foi relaxado quando o raio geográfico está activo.
 - **ADR-030 (2026-10-07):** Eliminação de Duplicação de Anúncios e Saneamento da Base de Dados. Identificadas cópias idênticas de anúncios nos cartões da interface. A causa raiz era uma invocação dupla da função `addOrUpdatePropertyServer` no `scraper-service.ts` (uma chamada sem `await` e outra imediata com `await`), aliada à ausência de verificação por `original_url` no momento de inserção e no retorno à UI. Foram eliminadas as chamadas redundantes, implementada busca por URL original antes de criar novo documento, adicionada deduplicação defensiva na entrega de dados e eliminados os 18 registos duplicados existentes na Appwrite.
+- **ADR-031 (2026-10-07):** Resolução de Erro de Compilação no Vercel (Interface ScraperResult). A compilação falhou no Vercel com `Property 'errors' does not exist on type 'ScraperResult'` em `ScrapeProgressModal.tsx`. O campo `errors?: string[]` foi adicionado à interface `ScraperResult` em `scraper-service.ts` e alimentado pelo relatório do `scrapeAllPortals`, restaurando a compilação limpa do Turbopack e TypeScript sem erros.
 
 ---
 
-## O que já funciona (v0.9.6)
+## O que já funciona (v0.9.7)
 - **Motor de Prospecção Dinâmico:** A "Ronda" pesquisa simultaneamente em todas as fontes activas da base de dados, independentemente de serem portais nativos ou fontes personalizadas, recorrendo a um crawler genérico (`generic.ts`) como fallback para recolha de oportunidades.
 - **Filtros Avançados por Intervalo:** Limites de Preço Mín/Máx (€) e Área Mín/Máx (m²) no painel expansível da `FilterBar` com filtragem reactiva instantânea.
 - **Categorias Estratégicas de Fontes:** 12 fontes categorizadas em Portais, Redes de Mediação, Classificados e Leilões Judiciais/Finanças, com abas de selecção rápida e etiquetas nos cartões.
